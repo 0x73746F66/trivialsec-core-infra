@@ -1,0 +1,103 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environments
+.venv
+**/.env
+**/.env-prod
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode
+.idea
+.terraform/
+terraform.*
+
+# sensitive
+**/*.db
+.vscode-upload.json
+cert_dot_sh/*.csv
+cert_dot_sh/*.csv.part
+**/.*history
+mysql_datadir/
+s3_datadir/
+worker_datadir/
+mongo_datadir/
+redis_datadir/
+**/node_modules/
+
+**/*.pem
+**/*.pid
+**/.monit*
+**/*.whl
+assets/site/
+DATA/
+LOGS/
+*.zip
+*.tar.gz
+scripts/deploy/packages/
+web/docker/packages/
+workers/docker/packages/
+scripts/deploy/route53-resource-record-set.json

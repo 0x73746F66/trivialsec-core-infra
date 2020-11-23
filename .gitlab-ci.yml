@@ -1,0 +1,38 @@
+before_script:
+  - aws --version
+
+stages:
+  - upload
+  - deploy
+
+upload:
+  retry: 2
+  tags:
+    - python
+  stage: upload
+  script:
+    - make upload
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  only:
+    refs:
+      - merge_request
+      - master
+
+deploy:
+  retry: 2
+  tags:
+    - python
+  stage: deploy
+  variables:
+    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+    AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  script:
+    - make upload
+    - echo "TODO deploy"
+  only:
+    refs:
+      - master

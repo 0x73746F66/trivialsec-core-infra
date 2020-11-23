@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Master template to offer a Catalog of reusable stacks
+Metadata: 
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Catalog Configuration
+        Parameters:
+          - Template
+          - OwnerEmail
+          - Environment
+          - Purpose
+      - Label:
+          default: service-account Stack Configuration
+        Parameters:
+          - UserName
+      - Label:
+          default: "S3 buckets Stack Configuration"
+        Parameters:
+          - BucketName
+      - Label:
+          default: "SQS Stack Configuration"
+        Parameters:
+          - QueueName
+          - MessageRetentionPeriod
+          - VisibilityTimeout
+          - MaxReceiveCount
+      - Label:
+          default: "website-bucket Stack Configuration"
+        Parameters:
+          - IndexDocument
+          - ErrorDocument
+    ParameterLabels:
+      OwnerEmail:
+        default: Who to notify or contact for stach changes?
+      Purpose:
+        default: What is the use case? to determine if the stack will persist
+      UserName:
+        default: (Optional) IAM User name for the service-account stack
+
+Parameters:
+  Template:
+    Type: String
+    AllowedValues:
+      - ecr-repositories.yaml
+      - service-account.yaml
+      - website-bucket.yaml
+      - encryption-bucket.yaml
+      - sqs.yaml
+      - fifo-sqs.yaml
+  OwnerEmail:
+    Type: String
+  UserName:
+    Type: String
+  Environment:
+    Type: String
+    Default: Dev
+    AllowedValues:
+      - Dev
+      - Prod
+  Purpose:
+    Type: String
+    Default: Testing
+    AllowedValues:
+      - Testing
+      - Deploy
+      - External
+  BucketName:
+    Type: String
+  IndexDocument:
+    Type: String
+    Default: index.html
+  ErrorDocument:
+    Type: String
+    Default: error.html
+  QueueName:
+    Type: String
+  MessageRetentionPeriod:
+    Type: Number
+    Default: 86400
+  VisibilityTimeout:
+    Type: Number
+    Default: 300
+  MaxReceiveCount:
+    Type: Number
+    Default: 1
+
+Resources:
+  Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      NotificationARNs:
+        - !Ref SNSTopic
+      TemplateURL: !Sub
+        - "https://cloudformation-trivialsec.s3-ap-southeast-2.amazonaws.com/${Template}"
+        - Template: !Ref Template
+      Tags:
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: !Ref Purpose
+      Parameters:
+        OwnerEmail: !Ref OwnerEmail
+        UserName: !Ref UserName
+        Environment: !Ref Environment
+        Purpose: !Ref Purpose
+        BucketName: !Ref BucketName
+        IndexDocument: !Ref IndexDocument
+        ErrorDocument: !Ref ErrorDocument
+        QueueName: !Ref QueueName
+        MessageRetentionPeriod: !Ref MessageRetentionPeriod
+        VisibilityTimeout: !Ref VisibilityTimeout
+        MaxReceiveCount: !Ref MaxReceiveCount
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref OwnerEmail
+          Protocol: "email"
+      TopicName: !Ref AWS::StackName

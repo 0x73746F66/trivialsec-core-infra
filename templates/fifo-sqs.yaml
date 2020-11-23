@@ -1,0 +1,133 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  OwnerEmail:
+    Type: String
+  Environment:
+    Type: String
+    Default: Dev
+    AllowedValues:
+      - Dev
+      - Prod
+  Purpose:
+    Type: String
+    Default: Testing
+    AllowedValues:
+      - Testing
+      - Deploy
+      - External
+  UserName:
+    Type: String
+  BucketName:
+    Type: String
+  IndexDocument:
+    Type: String
+  ErrorDocument:
+    Type: String
+  QueueName:
+    Type: String
+  MessageRetentionPeriod:
+    Type: Number
+    Default: 86400
+  VisibilityTimeout:
+    Type: Number
+    Default: 300
+  MaxReceiveCount:
+    Type: Number
+    Default: 1
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: True
+      QueueName: !Sub
+        - "DLQ-${QueueName}.fifo"
+        - QueueName: !Ref QueueName
+      VisibilityTimeout: !Ref VisibilityTimeout
+      Tags:
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: !Ref Purpose
+    DeletionPolicy: Retain
+
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties: 
+      FifoQueue: True
+      ContentBasedDeduplication: True
+      QueueName: !Sub
+        - "${QueueName}.fifo"
+        - QueueName: !Ref QueueName
+      MessageRetentionPeriod: !Ref MessageRetentionPeriod
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: !Ref MaxReceiveCount
+      VisibilityTimeout: !Ref VisibilityTimeout
+      Tags:
+        - Key: OwnerEmail
+          Value: !Ref OwnerEmail
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Purpose
+          Value: !Ref Purpose
+    DeletionPolicy: Retain
+
+  AlarmTopic: 
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Ref AWS::StackName
+      Subscription:
+        - Endpoint: !Ref OwnerEmail
+          Protocol: email
+
+  QueueDepthAlarm: 
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Alarm if queue depth increases to more than 10 messages
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt Queue.QueueName
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: 
+        - !Ref AlarmTopic
+      InsufficientDataActions: 
+        - !Ref AlarmTopic
+
+  DLCQueueDepthAlarm: 
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Alarm if queue depth increases to more than 10 messages
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !GetAtt DeadLetterQueue.QueueName
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions: 
+        - !Ref AlarmTopic
+      InsufficientDataActions: 
+        - !Ref AlarmTopic
+
+Outputs: 
+  SourceQueueURL: 
+    Value: !Ref Queue
+  SourceQueueARN:
+    Value: !GetAtt Queue.Arn
+  DeadLetterQueueURL: 
+    Value: !Ref DeadLetterQueue
+  DeadLetterQueueARN: 
+    Value: !GetAtt DeadLetterQueue.Arn
