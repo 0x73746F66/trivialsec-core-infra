@@ -18,7 +18,7 @@ CMD_AWS += --region $(AWS_REGION)
 endif
 
 install-dev:
-	pip install --use-feature=2020-resolver -q -U pip awscli
+	pip install -q -U pip awscli
 
 upload:
 	$(CMD_AWS) s3 cp --only-show-errors --recursive --include="*.yaml" ./templates s3://cloudformation-trivialsec/
