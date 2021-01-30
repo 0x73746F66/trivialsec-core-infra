@@ -74,30 +74,16 @@ venv.bak/
 .idea
 .terraform/
 terraform.*
+.terraform.*
 
 # sensitive
 **/*.db
 .vscode-upload.json
-cert_dot_sh/*.csv
-cert_dot_sh/*.csv.part
 **/.*history
-mysql_datadir/
-s3_datadir/
-worker_datadir/
-mongo_datadir/
-redis_datadir/
 **/node_modules/
 
 **/*.pem
 **/*.pid
-**/.monit*
 **/*.whl
-assets/site/
-DATA/
-LOGS/
 *.zip
 *.tar.gz
-scripts/deploy/packages/
-web/docker/packages/
-workers/docker/packages/
-scripts/deploy/route53-resource-record-set.json
