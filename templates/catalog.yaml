@@ -92,7 +92,7 @@ Resources:
       NotificationARNs:
         - !Ref SNSTopic
       TemplateURL: !Sub
-        - "https://cloudformation-trivialsec.s3-ap-southeast-2.amazonaws.com/${Template}"
+        - "https://trivialsec-assets.s3-ap-southeast-2.amazonaws.com/${Template}"
         - Template: !Ref Template
       Tags:
         - Key: OwnerEmail
