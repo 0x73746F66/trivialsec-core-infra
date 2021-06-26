@@ -70,7 +70,7 @@ tfdestroy:
     - make destroy
   when: manual
   environment:
-    name: linode
+    name: aws
     action: stop
   artifacts:
     name: tfdestroy
