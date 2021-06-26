@@ -9,7 +9,6 @@ before_script:
 
 stages:
   - plan
-  - upload
   - apply
 
 tfplan:
@@ -29,17 +28,6 @@ tfplan:
       - plans/.tfplan
     reports:
       terraform: plans/tfplan.json
-
-s3upload:
-  retry: 2
-  tags:
-    - python
-  stage: upload
-  script:
-    - make upload
-  only:
-    refs:
-      - main
 
 tfapply:
   retry: 2
