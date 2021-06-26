@@ -17,5 +17,5 @@ echo
 if [[ -f "$(which git-secrets 2>/dev/null)" ]]; then
   git-secrets --scan
 else
-  echo "Please install git-secrets"
+  echo -e "\033[0;31mPlease install git-secrets \033[0m"
 fi
