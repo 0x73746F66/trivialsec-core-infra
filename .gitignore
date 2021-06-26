@@ -72,18 +72,21 @@ venv.bak/
 # IDE
 .vscode
 .idea
-.terraform/
-terraform.*
-.terraform.*
+**/.terraform/
+**/.terraform*
+**/.tf*
+**/terraform.*
+tf*.json
 
 # sensitive
 **/*.db
 .vscode-upload.json
+cert_dot_sh/*.csv
+cert_dot_sh/*.csv.part
 **/.*history
-**/node_modules/
-
 **/*.pem
 **/*.pid
+**/.monit*
 **/*.whl
 *.zip
 *.tar.gz

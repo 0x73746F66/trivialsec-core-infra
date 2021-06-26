@@ -1,0 +1,163 @@
+{
+    "folders": [
+        {
+            "name": "Push Service",
+            "path": "push-service"
+        },
+        {
+            "name": "App",
+            "path": "appserver"
+        },
+        {
+            "name": "Core",
+            "path": "core"
+        },
+        {
+            "name": "Containers",
+            "path": "containers-common"
+        },
+        {
+            "name": "API",
+            "path": "public-api"
+        },
+        {
+            "name": "python libs",
+            "path": "python-common"
+        },
+        {
+            "name": "WIP Webhooks",
+            "path": "python-webhooks"
+        },
+        {
+            "name": "Proxy",
+            "path": "forward-proxy"
+        },
+        {
+            "name": "WIP screenshots",
+            "path": "screenshots"
+        },
+        {
+            "name": "Website",
+            "path": "website"
+        },
+        {
+            "name": "Workers",
+            "path": "workers"
+        },
+        {
+            "name": "Ingress Controller",
+            "path": "ingress-controller"
+        },
+    ],
+    "extensions": {
+        "recommendations": [
+            "samuelcolvin.jinjahtml",
+            "ms-azuretools.vscode-docker",
+            "usernamehw.errorlens",
+            "hashicorp.terraform",
+            "redhat.vscode-xml",
+            "mtxr.sqltools",
+            "ms-python.python",
+            "huizhou.githd",
+            "ryu1kn.partial-diff",
+            "sonarsource.sonarlint-vscode",
+            "ms-vscode-remote.vscode-remote-extensionpack",
+            "redhat.vscode-yaml",
+            "aws-scripting-guy.cform",
+            "snyk-security.vscode-vuln-cost",
+            "ms-vscode-remote.remote-containers",
+            "redhat.vscode-commons"
+        ]
+    },
+    "settings": {
+        "sonarlint.rules": {
+            "Web:BoldAndItalicTagsCheck": {
+                "level": "off"
+            },
+            "Web:LinkToImageCheck": {
+                "level": "off"
+            }
+        },
+        "vulnCost.sendStatistics": false,
+        "vulnCost.htmlExtensions": [
+            "\\.html?$"
+        ],
+        "editor.largeFileOptimizations": false,
+        "explorer.confirmDelete": false,
+        "files.autoSave": "afterDelay",
+        "git.confirmSync": false,
+        "git.autofetch": true,
+        "git.enableSmartCommit": true,
+        "explorer.confirmDragAndDrop": false,
+        "python.linting.pylintEnabled": true,
+        "python.linting.enabled": true,
+        "yaml.customTags": [
+            "!And",
+            "!If",
+            "!Not",
+            "!Equals",
+            "!Or",
+            "!FindInMap sequence",
+            "!Base64",
+            "!Cidr",
+            "!Ref",
+            "!Sub",
+            "!GetAtt",
+            "!GetAZs",
+            "!ImportValue",
+            "!Select",
+            "!Select sequence",
+            "!Split",
+            "!Join sequence"
+        ],
+        "yaml.format.enable": true,
+        "cSpell.enableFiletypes": [
+            "jinja-html"
+        ],
+        "cSpell.words": [
+            "Gitlab",
+            "INET",
+            "Youtube",
+            "boto",
+            "botocore",
+            "cvss",
+            "dateutil",
+            "errno",
+            "gethostbyname",
+            "grecaptcha",
+            "initialising",
+            "jsonify",
+            "opensll",
+            "organisation",
+            "personalizations",
+            "pylint",
+            "recaptcha",
+            "socketio",
+            "stylesheet",
+            "trivialsec",
+            "tzlocal"
+        ],
+        "sonarlint.disableTelemetry": true,
+        "sonarlint.output.showAnalyzerLogs": true
+    },
+    "launch": {
+        "version": "0.3.0",
+        "configurations": [
+            {
+                "name": "Attach to Chrome localhost:5000",
+                "type": "chrome",
+                "request": "attach",
+                "port": 9222,
+                "url": "http://localhost:5000/dashboard",
+                "webRoot": "${workspaceFolder}/appserver/src"
+            }, {
+                "name": "Attach to Chrome localhost:8080",
+                "type": "chrome",
+                "request": "attach",
+                "port": 9222,
+                "url": "http://localhost:8080",
+                "webRoot": "${workspaceFolder}/website/src"
+            }
+        ]
+    }
+}

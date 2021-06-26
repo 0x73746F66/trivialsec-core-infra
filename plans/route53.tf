@@ -8,25 +8,6 @@ resource "aws_route53_record" "mx" {
         "20 mailsec.protonmail.ch"
     ]
 }
-resource "aws_route53_record" "ns" {
-    zone_id = local.hosted_zone
-    name    = local.apex_domain
-    type    = "NS"
-    ttl     = 300
-    records = [
-        "ns-1969.awsdns-54.co.uk.",
-        "ns-831.awsdns-39.net.",
-        "ns-300.awsdns-37.com.",
-        "ns-1391.awsdns-45.org."
-    ]
-}
-resource "aws_route53_record" "soa" {
-    zone_id = local.hosted_zone
-    name    = local.apex_domain
-    type    = "SOA"
-    ttl     = 300
-    records = ["ns-1969.awsdns-54.co.uk. awsdns-hostmaster.amazon.com. 1 7200 900 1209600 86400"]
-}
 resource "aws_route53_record" "txt" {
     zone_id = local.hosted_zone
     name    = local.apex_domain
@@ -171,22 +152,4 @@ resource "aws_route53_record" "mail_mx" {
     type    = "MX"
     ttl     = 300
     records = ["10 smtp5.mxmailer.org."]
-}
-resource "aws_route53_record" "proxy" {
-    zone_id = local.hosted_zone
-    name    = "proxy.${local.apex_domain}"
-    type    = "A"
-    ttl     = 300
-    records = ["54.79.237.235"]
-}
-resource "aws_route53_record" "status_ns" {
-    zone_id = local.hosted_zone
-    name    = "status.${local.apex_domain}"
-    type    = "NS"
-    ttl     = 300
-    records = [
-        "ns1.digitalocean.com",
-        "ns2.digitalocean.com",
-        "ns3.digitalocean.com"
-    ]
 }

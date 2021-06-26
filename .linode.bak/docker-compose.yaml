@@ -1,0 +1,71 @@
+version: '3.7'
+x-defaults: &defaults
+  restart: unless-stopped
+  network_mode: host
+  logging:
+    options:
+      max-size: "10m"
+      max-file: "3"
+services:
+  statping:
+    <<: *defaults
+    image: statping/statping
+    container_name: statping
+    volumes:
+      - /root/statping:/app
+    environment:
+      NAME: Trivial Security
+      DB_CONN: sqlite
+      VIRTUAL_HOST: status.trivialsec.com
+      VIRTUAL_PORT: 8080
+      DOMAIN: https://status.trivialsec.com
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: KVgu!J7uGC%wu6G3f6tjRvErViPWom&V
+      ADMIN_EMAIL: support@trivialsec.com
+    expose:
+      - 8080
+  ghost:
+    <<: *defaults
+    image: ghost:4-alpine
+    container_name: ghost
+    volumes:
+      - /root/ghost:/var/lib/ghost/content
+    environment:
+      url: https://www.langton.cloud
+    expose:
+      - 2368
+  nginx:
+    <<: *defaults
+    image: nginx
+    container_name: nginx
+    volumes:
+      - /root/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - /root/letsencrypt/conf:/etc/letsencrypt
+      - /root/letsencrypt/www:/var/www/certbot
+    expose:
+      - 80
+      - 443
+    command: '/bin/sh -c ''while :; do sleep 10m & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+  certbot:
+    <<: *defaults
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - /root/letsencrypt/conf:/etc/letsencrypt
+      - /root/letsencrypt/www:/var/www/certbot
+    entrypoint: '/bin/sh -c ''trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'''
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
