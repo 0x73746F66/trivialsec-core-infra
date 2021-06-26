@@ -1,7 +1,7 @@
 variables:
-  AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
-  AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
-  AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+  AWS_DEFAULT_REGION: ap-southeast-2
+  AWS_REGION: ap-southeast-2
+  AWS_ACCOUNT: 814504268053
 
 before_script:
   - terraform --version
@@ -10,22 +10,27 @@ before_script:
 stages:
   - plan
   - upload
-  - deploy
+  - apply
 
-plan:
+tfplan:
   retry: 2
   tags:
     - python
   stage: plan
   script:
-    - terraform init plans
     - make plan
   only:
     refs:
       - merge_request
-      - master
+      - main
+  artifacts:
+    name: tfplan
+    paths:
+      - plans/.tfplan
+    reports:
+      terraform: plans/tfplan.json
 
-upload:
+s3upload:
   retry: 2
   tags:
     - python
@@ -34,15 +39,42 @@ upload:
     - make upload
   only:
     refs:
-      - master
+      - main
 
-deploy:
+tfapply:
   retry: 2
   tags:
     - python
-  stage: deploy
+  stage: apply
   script:
-    - make deploy
+    - make apply
   only:
     refs:
-      - master
+      - main
+  environment:
+    name: aws
+    url: https://sso.jumpcloud.com/saml2/aws1
+    on_stop: tfdestroy
+  dependencies:
+    - tfplan
+  when: manual
+
+tfdestroy:
+  retry: 2
+  stage: apply
+  variables:
+    GIT_STRATEGY: none
+  tags:
+    - python
+  script:
+    - make destroy
+  when: manual
+  environment:
+    name: aws
+    action: stop
+  artifacts:
+    name: tfdestroy
+    paths:
+      - plans/.tfdestroy
+    reports:
+      terraform: plans/tfdestroy.json
