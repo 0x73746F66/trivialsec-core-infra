@@ -1,8 +1,7 @@
 SHELL := /bin/bash
 -include .env
 export $(shell sed 's/=.*//' .env)
-APP_NAME := website
-
+.ONESHELL: # Applies to every targets in the file!
 .PHONY: help
 
 help: ## This help.
@@ -10,32 +9,31 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-CMD_AWS := aws
-ifdef AWS_PROFILE
-CMD_AWS += --profile $(AWS_PROFILE)
-endif
-ifdef AWS_REGION
-CMD_AWS += --region $(AWS_REGION)
-endif
-
-upload:
-	$(CMD_AWS) s3 cp --only-show-errors --recursive --include="*.yaml" ./templates s3://trivialsec-assets/cloudformation/
-
-setup-deb:
-	pip install -q -U pip awscli
+tfinstall:
 	curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-	sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com focal main"
-	sudo apt-get update && sudo apt-get install -y terraform
-	terraform -install-autocomplete
-	terraform init plans
+	sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(shell lsb_release -cs) main"
+	sudo apt-get update
+	sudo apt-get install -y terraform
+	terraform -install-autocomplete || true
 
-update:
-	git pull
+init:  ## Runs tf init tf
+	cd plans
+	terraform init -reconfigure -upgrade=true
 
-plan:
-	mkdir -p build
-	terraform validate plans
-	terraform plan -no-color -out=build/.tfplan plans
+plan: init ## Runs tf validate and tf plan
+	cd plans
+	terraform init -reconfigure -upgrade=true
+	terraform validate
+	terraform plan -no-color -out=.tfplan
+	terraform show --json .tfplan | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > tfplan.json
 
-deploy:
-	terraform apply -auto-approve -refresh=true build/.tfplan
+apply: plan ## tf apply -auto-approve -refresh=true
+	cd plans
+	terraform apply -auto-approve -refresh=true .tfplan
+
+destroy: init ## tf destroy -auto-approve
+	cd plans
+	terraform validate
+	terraform plan -destroy -no-color -out=.tfdestroy
+	terraform show --json .tfdestroy | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > tfdestroy.json
+	terraform apply -auto-approve -destroy .tfdestroy
