@@ -86,3 +86,27 @@ resource "aws_ssm_parameter" "whoisxmlapi_key" {
     cost-center = "saas"
   }
 }
+resource "aws_ssm_parameter" "phishtank_username" {
+  name        = "/${var.app_env}/Deploy/trivialsec/phishtank_username"
+  type        = "String"
+  value       = var.phishtank_username
+  tags = {
+    cost-center = "saas"
+  }
+}
+resource "aws_ssm_parameter" "stripe_publishable_key" {
+  name        = "/${var.app_env}/Deploy/trivialsec/stripe_publishable_key"
+  type        = "String"
+  value       = var.stripe_publishable_key
+  tags = {
+    cost-center = "saas"
+  }
+}
+resource "aws_ssm_parameter" "recaptcha_site_key" {
+  name        = "/${var.app_env}/Deploy/trivialsec/recaptcha_site_key"
+  type        = "String"
+  value       = var.recaptcha_site_key
+  tags = {
+    cost-center = "saas"
+  }
+}
