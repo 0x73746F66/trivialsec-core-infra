@@ -20,7 +20,7 @@ stages:
 tf:plan:
   retry: 2
   tags:
-    - python
+    - linode
   stage: plan
   script:
     - make plan
@@ -38,7 +38,7 @@ tf:plan:
 tf:apply:
   retry: 2
   tags:
-    - python
+    - linode
   stage: apply
   script:
     - make apply
@@ -59,7 +59,7 @@ tf:destroy:
   variables:
     GIT_STRATEGY: none
   tags:
-    - python
+    - linode
   script:
     - make destroy
   when: manual
