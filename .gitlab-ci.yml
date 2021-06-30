@@ -1,5 +1,4 @@
 variables:
-  AWS_DEFAULT_REGION: ap-southeast-2
   AWS_REGION: ap-southeast-2
   AWS_ACCOUNT: 814504268053
   TF_VAR_app_env: Prod
@@ -8,17 +7,20 @@ variables:
   TF_VAR_phishtank_username: stoff
 
 before_script:
+  - touch .env
+  - make --version
   - terraform --version
   - aws --version
+  - docker --version
 
 stages:
   - plan
   - apply
 
-tfplan:
+tf:plan:
   retry: 2
   tags:
-    - python
+    - linode
   stage: plan
   script:
     - make plan
@@ -33,10 +35,10 @@ tfplan:
     reports:
       terraform: plans/tfplan.json
 
-tfapply:
+tf:apply:
   retry: 2
   tags:
-    - python
+    - linode
   stage: apply
   script:
     - make apply
@@ -46,18 +48,18 @@ tfapply:
   environment:
     name: aws
     url: https://sso.jumpcloud.com/saml2/aws1
-    on_stop: tfdestroy
+    on_stop: tf:destroy
   dependencies:
-    - tfplan
+    - tf:plan
   when: manual
 
-tfdestroy:
+tf:destroy:
   retry: 2
   stage: apply
   variables:
     GIT_STRATEGY: none
   tags:
-    - python
+    - linode
   script:
     - make destroy
   when: manual
