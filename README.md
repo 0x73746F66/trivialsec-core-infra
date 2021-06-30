@@ -72,10 +72,10 @@ using the CloudFormation template in the `aws-iac` repo and then configure your 
 
 ## Get the platform running locally
 
-Run `make setup`, `make build`, and `make up` in the `containers-common` which will build the python and nodejs base images for docker and bring up MySQL, Minio, and Redis locally.
+Run `make setup`, `make build`, and `make up` in the `containers-common` which will build the python and nodejs base images for docker and bring up MySQL and Redis locally.
 
 Run `make package-local` in the `python-common` repo to build the libs needed for the API, App, and Workers projects.
-In `workers` run `make package-dev`.
+In `workers` run `make package`.
 
 In `push-service`, `app-server`, `public-api`, and `workers` projects run `make build` and `make up`.
 
