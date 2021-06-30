@@ -6,7 +6,17 @@ x-defaults: &defaults
     options:
       max-size: "10m"
       max-file: "3"
+
 services:
+  linode-slackbot:
+    <<: *defaults
+    image: chrisdlangton/linode-slackbot
+    environment:
+      - LINODE_TOKEN=${LINODE_TOKEN}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    volumes:
+      - db:/srv/app/sqlite
+
   statping:
     <<: *defaults
     image: statping/statping
@@ -24,6 +34,7 @@ services:
       ADMIN_EMAIL: support@trivialsec.com
     expose:
       - 8080
+
   ghost:
     <<: *defaults
     image: ghost:4-alpine
@@ -34,6 +45,7 @@ services:
       url: https://www.langton.cloud
     expose:
       - 2368
+
   nginx:
     <<: *defaults
     image: nginx
@@ -54,6 +66,7 @@ services:
       - SETUID
       - DAC_OVERRIDE
       - NET_BIND_SERVICE
+
   certbot:
     <<: *defaults
     image: certbot/certbot
@@ -69,3 +82,16 @@ services:
       - SETGID
       - SETUID
       - DAC_OVERRIDE
+
+  gitlab-runner:
+    <<: *defaults
+    image: registry.gitlab.com/trivialsec/containers-common/gitlab-runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /root/gitlab-cache:/cache:rw
+      - /root/gitlab-runner-config:/etc/gitlab-runner:rw
+
+volumes:
+  db:
+    external: true
+    name: linode-slack-db
