@@ -16,7 +16,7 @@ terraform {
         }
     }
     backend "s3" {
-        bucket = "static-trivialsec"
+        bucket = "tfplans-trivialsec"
         key    = "terraform/statefiles/core"
         region  = "ap-southeast-2"
     }
