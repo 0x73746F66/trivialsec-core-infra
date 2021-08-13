@@ -9,6 +9,12 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
+python-libs: ## download and install the trivialsec python libs locally (for IDE completions)
+	yes | pip uninstall -q trivialsec-common
+	@$(shell rm -rf python-libs; git clone --depth 1 --branch ${COMMON_VERSION} --single-branch https://${DOCKER_USER}:${DOCKER_PASSWORD}@gitlab.com/trivialsec/python-common.git python-libs)
+	cd python-libs
+	make install
+
 tfinstall:
 	curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 	sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(shell lsb_release -cs) main"

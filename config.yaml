@@ -1,0 +1,93 @@
+---
+app:
+  version: 21.6.28
+  frontend:
+    asset_scheme: "https://"
+    asset_domain: assets.trivialsec
+    site_scheme: "https://"
+    site_domain: www.trivialsec
+    app_scheme: "https://"
+    app_domain: app.trivialsec
+    api_scheme: "https://"
+    api_domain: api.trivialsec
+    socket_scheme: "wss://"
+    socket_domain: ws.trivialsec
+  backend:
+    asset_scheme: "http://"
+    asset_domain: assets.trivialsec:8080
+    site_scheme: "http://"
+    site_domain: www.trivialsec:8080
+    app_scheme: "http://"
+    app_domain: app.trivialsec:5000
+    api_scheme: "http://"
+    api_domain: api.trivialsec:5081
+    socket_scheme: "wss://"
+    socket_domain: ws.trivialsec:5080
+  nameservers:
+    - 1.1.1.1     # Cloudflare
+    - 8.8.8.8     # Google
+    - 64.6.64.6   # Verisign
+    - 74.82.42.42 # Hurricane Electric
+    - 77.88.8.1   # Yandex.DNS
+    - 9.9.9.9     # Quad9
+  nmap:
+    ports: 20-23,25,53,57,67-69,80,81,82,107-113,115,118-119,135,137-139,143,153,156,170,177,179,194,209,213,218,220,300,311,366,369-371,383,384,387,389,399,427,433,434,443-445,464,465,475,491,514,515,517,518,520,521,524,530-533,540,546-548,556,560,561,563-585,587,591,593,601,604,623,625,631,635,636,639,641,646-648,653-655,657,660,666,674,688,690,691,706,711,712,749-754,760,782,783,808,832,843,847,848,873,953-61000
+  public_endpoints:
+    - /confirmation
+    - /verify
+    - /login
+    - /logout
+    - /recovery
+  require_authz:
+    - /account/update-billing-email
+    - /account/update-email
+    - /recovery/regenerate-scratch
+
+redis:
+  host: localhost
+  ssl: False
+  ttl: 10
+
+mysql:
+  database: trivialsec
+  user: root
+  host: localhost
+
+aws:
+  region_name: ap-southeast-2
+  archive_bucket: archive-trivialsec
+  public_bucket: assets-trivialsec
+  env_prefix: dev
+
+sendgrid:
+  templates:
+    invitations: d-ddd501dd76634f12bdba7dfcee416270
+    registrations: d-1259c22153484803bdc4d6cb490571a6
+    subscriptions: d-14c95c71ba5f40deac27eb8e0bcd0373
+    updated_email: d-30f820fc0f8a4f4d9f0fd5592a7419b5
+    account_recovery: d-d6ec3c4db69b46cd8a4bf873ef03bf16
+    magic_link: d-c356f835c3b541d2ba76f5f50bb5a27b
+    recovery_request: d-11d132b6513749a48005d21cb56df2dc
+  groups:
+    notifications: 14193
+    focus_group: 14107
+    subscriptions: 14106
+    marketing: 14105
+  lists:
+    subscribers: a656c506-1a36-45ad-ad29-bb54db25ccd9
+    members: 7c88b8a4-9b7a-4a25-9b09-be3d3a0cdcf3
+    trials: 6d72d4a5-5e15-455f-9cd4-0f28a9f06e24
+
+stripe:
+  account: acct_1HTJBRGZtHTgMn6l
+  products:
+    enterprise:
+      product_id: prod_I3nN4WJDEcSqKw
+    standard:
+      product_id: prod_I3nOpBV12MdUpr
+      monthly: price_1HTfo7GZtHTgMn6lOPINHEyX
+      yearly: price_1HTfo8GZtHTgMn6lOkp6zcev
+    professional: 
+      product_id: prod_I3nPIEoht0v7Tf
+      monthly: price_1HTfocGZtHTgMn6lqNFx4h5t
+      yearly: price_1HTfocGZtHTgMn6lRyFNwk23
