@@ -1,11 +1,9 @@
-from pprint import pprint
 import json
 import logging
 import pathlib
 from datetime import datetime, timedelta
 import os
 import xml
-from io import StringIO
 from xml.etree.ElementTree import Element, ElementTree
 import requests
 from requests.exceptions import ConnectTimeout, ReadTimeout
