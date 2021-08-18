@@ -1,3 +1,10 @@
+provider "aws" {
+    region              = local.aws_default_region
+    secret_key          = var.aws_secret_access_key
+    access_key          = var.aws_access_key_id
+    allowed_account_ids = [local.aws_master_account_id]
+}
+
 terraform {
     required_version = ">= 1.0.1"
 
@@ -16,15 +23,8 @@ terraform {
         }
     }
     backend "s3" {
-        bucket = "tfplans-trivialsec"
-        key    = "terraform/statefiles/core"
-        region  = "ap-southeast-2"
+        bucket      = "stateful-trivialsec"
+        key         = "terraform/core"
+        region      = "ap-southeast-2"
     }
-}
-
-provider "aws" {
-    region              = local.aws_default_region
-    secret_key          = var.aws_secret_access_key
-    access_key          = var.aws_access_key_id
-    allowed_account_ids = [local.aws_master_account_id]
 }

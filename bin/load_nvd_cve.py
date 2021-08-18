@@ -9,6 +9,8 @@ from trivialsec.models.cve import CVE
 from trivialsec.models.cve_cpe import CPE
 from trivialsec.models.cve_reference import CVEReference
 from trivialsec.models.cwe import CWE
+from trivialsec.helpers.config import config
+
 
 session = requests.Session()
 logger = logging.getLogger(__name__)
@@ -16,12 +18,6 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - [%(levelname)s] %(message)s',
     level=logging.INFO
 )
-
-class Config:
-    http_proxy = None
-    https_proxy = None
-
-config = Config()
 PROXIES = None
 if config.http_proxy or config.https_proxy:
     PROXIES = {
@@ -64,28 +60,43 @@ def download_cve_file(year :int):
     for item in data['CVE_Items']:
         cve = CVE()
         cve.cve_id = item['cve']['CVE_data_meta']['ID']
+        cve.hydrate()
         cve.assigner = item['cve']['CVE_data_meta']['ASSIGNER']
         description = []
         for desc in item['cve']['description']['description_data']:
             description.append(desc['value'])
         cve.description = '\n'.join(description)
-        cvss_version = None
-        vector = None
-        base_score = None
-        exploitability_score = None
-        impact_score = None
+        cvss_version = cve.cvss_version
+        vector = cve.vector
+        base_score = cve.base_score
+        exploitability_score = cve.exploitability_score
+        impact_score = cve.impact_score
         if 'baseMetricV2' in item['impact'] and 'cvssV2' in item['impact']['baseMetricV2']:
-            cvss_version = item['impact']['baseMetricV2']['cvssV2']['version']
-            vector = item['impact']['baseMetricV2']['cvssV2']['vectorString']
+            original_vector = CVE.vector_to_dict(cve.vector, 2) if cve.vector is not None else {}
+            if original_vector.get('CVSS') != '2.0':
+                original_vector = {}
+            vd = CVE.vector_to_dict(item['impact']['baseMetricV2']['cvssV2']['vectorString'], 2)
+            cvss_version = vd.get('CVSS', '2.0')
+            vd['E'] = original_vector.get('E', vd['E'])
+            vd['RL'] = original_vector.get('RL', vd['RL'])
+            vd['RC'] = original_vector.get('RC', vd['RC'])
             base_score = item['impact']['baseMetricV2']['cvssV2']['baseScore']
             exploitability_score = item['impact']['baseMetricV2']['exploitabilityScore']
             impact_score = item['impact']['baseMetricV2']['impactScore']
+            vector = CVE.dict_to_vector(vd, 2)
         if 'baseMetricV3' in item['impact'] and 'cvssV3' in item['impact']['baseMetricV3']:
-            cvss_version = item['impact']['baseMetricV3']['cvssV3']['version']
-            vector = item['impact']['baseMetricV3']['cvssV3']['vectorString'].replace(f'CVSS:{cvss_version}/', '')
+            original_vector = CVE.vector_to_dict(cve.vector, 3) if cve.vector is not None else {}
+            if original_vector.get('CVSS') not in ['3.0', '3.1']:
+                original_vector = {}
+            vd = CVE.vector_to_dict(item['impact']['baseMetricV3']['cvssV3']['vectorString'], 3)
+            cvss_version = vd.get('CVSS', '3.1')
+            vd['E'] = original_vector.get('E', vd['E'])
+            vd['RL'] = original_vector.get('RL', vd['RL'])
+            vd['RC'] = original_vector.get('RC', vd['RC'])
             base_score = item['impact']['baseMetricV3']['cvssV3']['baseScore']
             exploitability_score = item['impact']['baseMetricV3']['exploitabilityScore']
             impact_score = item['impact']['baseMetricV3']['impactScore']
+            vector = CVE.dict_to_vector(vd, 3)
 
         cve.cvss_version = cvss_version
         cve.vector = vector
@@ -109,13 +120,15 @@ def download_cve_file(year :int):
                 cwe.add_cve(cve)
 
         for ref in item['cve']['references']['reference_data']:
-            CVEReference(
+            cve_ref = CVEReference(
                 cve_id=cve.cve_id,
                 url=ref.get('url'),
                 name=ref.get('name'),
                 source=ref.get('refsource'),
                 tags=','.join(ref.get('tags')),
-            ).persist()
+            )
+            if not cve_ref.exists(['cve_id', 'url']):
+                cve_ref.persist(False)
 
         for configuration_node in item['configurations']['nodes']:
             for cpe_match in configuration_node['cpe_match']:
@@ -125,7 +138,8 @@ def download_cve_file(year :int):
                     version_end_excluding=cpe_match.get('versionEndExcluding'),
                 ).persist()
 
-def process_all(year :int = 2002):
+def process_all(start_year :int = 2002):
+    year = start_year or 2002
     while year <= datetime.utcnow().year:
         download_cve_file(year)
         year += 1

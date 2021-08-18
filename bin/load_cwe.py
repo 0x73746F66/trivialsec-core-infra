@@ -6,7 +6,6 @@ import pathlib
 from os import environ
 from trivialsec.models.cwe import CWE
 from trivialsec.models.cve import CVE
-from trivialsec.helpers.config import config
 
 
 logger = logging.getLogger(__name__)
@@ -20,10 +19,11 @@ def current_and_next(items):
     for item, next_item in zip(items, items[1:]):
         yield item, next_item
 
-def process_csv(filename: str):
+def process_csv(filename :str):
     cwe_file = pathlib.Path(filename)
     if not cwe_file.is_file():
         logger.info(filename)
+        return
 
     cr = csv.DictReader(cwe_file.read_text().splitlines(), delimiter=',')
     my_list = list(cr)

@@ -27,13 +27,6 @@ resource "aws_route53_record" "sendgrid_cname" {
     ttl     = 300
     records = ["sendgrid.net"]
 }
-resource "aws_route53_record" "acm_cname" {
-    zone_id = local.hosted_zone
-    name    = "_05f1a0310986daa4456de17adf6c577c.${local.apex_domain}"
-    type    = "CNAME"
-    ttl     = 300
-    records = ["_6248be44780169afe8ba8350aaba228d.zdxcnfdgtt.acm-validations.aws."]
-}
 resource "aws_route53_record" "dmarc" {
     zone_id = local.hosted_zone
     name    = "_dmarc.${local.apex_domain}"

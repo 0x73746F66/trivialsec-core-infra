@@ -92,3 +92,4 @@ cert_dot_sh/*.csv.part
 *.gz
 datafiles/
 python-libs/
+s3/

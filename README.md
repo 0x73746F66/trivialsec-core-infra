@@ -4,7 +4,24 @@
 
 # This repo
 
-TBC
+# AWS Setup
+
+- Create account
+- Create saml-provider via IAM Identity Providors: saml-provider/JumpCloud with SSO service location: https://sso.jumpcloud.com/saml2/aws1
+- Create IAM Role FullAdmin with trust relationship to only the saml-provider/JumpCloud and managed policies: Billing, AdministratorAccess, AWSOrganizationsFullAccess, and AWSArtifactAccountSync
+- Create IAM Role ServiceAccountRole with trust relationship to this account and the saml-provider/JumpCloud
+- Create IAM Policy ServiceAccountPolicy which currently needs CloudFront, IAM, Route53, S3, STS, Systems Manager
+- In us-east-1 region, create an ACM cert for `trivialsec.com` and `*.trivialsec.com` using email validation
+
+# Gitlab CI access to AWSS
+
+- Create IAM User gitlab-ci
+- Attach GitlabPolicy
+
+# AWS Service Accounts
+
+- Create IAM User chris-service-account (use your name)
+- Attach ServiceAccountPolicy
 
 # Workspace Setup
 

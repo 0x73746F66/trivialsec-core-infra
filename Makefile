@@ -43,3 +43,10 @@ destroy: init ## tf destroy -auto-approve
 	terraform plan -destroy -no-color -out=.tfdestroy
 	terraform show --json .tfdestroy | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > tfdestroy.json
 	terraform apply -auto-approve -destroy .tfdestroy
+
+sync-datafiles:
+ifdef AWS_PROFILE
+	aws --profile $(AWS_PROFILE) s3 sync datafiles/ s3://assets-trivialsec/vendor/
+else
+	aws s3 sync datafiles/ s3://assets-trivialsec/vendor/
+endif
