@@ -120,6 +120,8 @@ def download_cve_file(year :int):
                 cwe.add_cve(cve)
 
         for ref in item['cve']['references']['reference_data']:
+            if 'cve.mitre.org' in ref.get('url'):
+                continue
             cve_ref = CVEReference(
                 cve_id=cve.cve_id,
                 url=ref.get('url'),

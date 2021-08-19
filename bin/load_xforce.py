@@ -1,3 +1,4 @@
+import glob
 import json
 import logging
 import pathlib
@@ -22,6 +23,7 @@ logging.basicConfig(
 BASE_URL = 'https://exchange.xforce.ibmcloud.com'
 DATAFILE_DIR = 'datafiles/xforce/vulnerabilities'
 PROXIES = None
+SOURCE = 'IBM X-Force Exchange'
 if config.http_proxy or config.https_proxy:
     PROXIES = {
         'http': f'http://{config.http_proxy}',
@@ -83,20 +85,20 @@ def process_file(filename :str):
                 cve.persist()
 
             for ref in xforce_data['references']:
-                if 'cve.mitre.org' in ref:
+                if 'cve.mitre.org' in ref['link_target']:
                     continue
                 reference = CVEReference()
                 reference.cve_id = cve_ref
                 reference.name = ref['link_name']
                 reference.url = ref['link_target']
-                reference.source = 'xforce'
+                reference.source = SOURCE
                 reference.tags = xforce_data['tagname']
                 reference.persist()
 
             cve_remedy = CVERemediation()
             cve_remedy.cve_id = cve_ref
             cve_remedy.type = 'advisory'
-            cve_remedy.source = 'xforce'
+            cve_remedy.source = SOURCE
             cve_remedy.source_id = xforce_data['xfdbid']
             cve_remedy.source_url = f"https://exchange.xforce.ibmcloud.com/vulnerabilities/{xforce_data['xfdbid']}"
             cve_remedy.description = xforce_data['remedy']
@@ -303,25 +305,16 @@ def do_bulk(start :datetime, end :datetime) -> bool:
     return True
 
 def read_file(file_path :str):
-    bulk_file = pathlib.Path(file_path)
-    if bulk_file.is_file():
-        for item in json.loads(bulk_file.read_text()):
-            datafile = f"{DATAFILE_DIR}/{item['xfdbid']}.json"
-            logger.debug(datafile)
-            xforce_file = pathlib.Path(datafile)
-            if xforce_file.is_file():
-                original_data = json.loads(xforce_file.read_text())
-                original_data |= item
-                original_data['cvss_vector'] = xforce_cvss_vector(original_data)
-                xforce_json = json.dumps(original_data, default=str, sort_keys=True)
-                xforce_file.write_text(xforce_json)
-                process_file(datafile)
-                continue
-
-            item['cvss_vector'] = xforce_cvss_vector(item)
-            xforce_json = json.dumps(item, default=str, sort_keys=True)
-            xforce_file.write_text(xforce_json)
-            process_file(datafile)
+    xforce_file = pathlib.Path(file_path)
+    if not xforce_file.is_file():
+        return None
+    item = json.loads(xforce_file.read_text())
+    original_data = json.loads(xforce_file.read_text())
+    original_data |= item
+    original_data['cvss_vector'] = xforce_cvss_vector(original_data)
+    xforce_json = json.dumps(original_data, default=str, sort_keys=True)
+    xforce_file.write_text(xforce_json)
+    process_file(file_path)
 
 def query_all_individually():
     next_id = 1
@@ -351,6 +344,10 @@ def query_all_individually():
             logger.info(raw)
         next_id += 1
 
+def process_local():
+    for pathname in glob.glob(f"{DATAFILE_DIR}/*.json"):
+        read_file(pathname)
+
 def main():
     now = datetime.utcnow()
     not_before = now - timedelta(days=3)
@@ -364,6 +361,6 @@ def main():
         sleep(randint(3,6))
 
 if __name__ == "__main__":
-    # read_file("xforce-response.json")
+    process_local()
     # main()
-    do_latest()
+    # do_latest()

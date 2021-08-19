@@ -1178,13 +1178,6 @@ def save_definition(definition :dict):
     for cve_id in definition.get('cve', []):
         for vendor in definition['vendors']:
             try:
-                cve_reference = CVEReference()
-                cve_reference.cve_id = cve_id
-                cve_reference.url = vendor.get('ref_url')
-                cve_reference.name = vendor.get('ref_id')
-                cve_reference.source = definition.get('oval_id')
-                cve_reference.tags = ','.join(set([item for sublist in definition.get('contributors') for item in sublist]))
-                cve_reference.persist()
                 remediation = CVERemediation()
                 remediation.cve_id = cve_id
                 remediation.type = 'patch'
@@ -1194,6 +1187,16 @@ def save_definition(definition :dict):
                 remediation.description = definition.get('description')
                 remediation.published_at = definition.get('submitted_at').replace('T', ' ')
                 remediation.persist()
+                if 'cve.mitre.org' in vendor.get('ref_url'):
+                    continue
+                cve_reference = CVEReference()
+                cve_reference.cve_id = cve_id
+                cve_reference.url = vendor.get('ref_url')
+                cve_reference.name = vendor.get('ref_id')
+                cve_reference.source = definition.get('oval_id')
+                cve_reference.tags = ','.join(set([item for sublist in definition.get('contributors') for item in sublist]))
+                cve_reference.persist()
+
             except Exception as ex:
                 logger.exception(ex)
                 logger.error(json.dumps(definition, default=str))

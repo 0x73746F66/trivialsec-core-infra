@@ -1,9 +1,7 @@
-import json
 import glob
 import logging
 import csv
 import pathlib
-from os import environ
 from trivialsec.models.cwe import CWE
 from trivialsec.models.cve import CVE
 
