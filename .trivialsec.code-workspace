@@ -48,6 +48,10 @@
             "name": "Ingress Controller",
             "path": "ingress-controller"
         },
+        {
+            "name": "MySQL",
+            "path": "mysql"
+        },
     ],
     "extensions": {
         "recommendations": [
@@ -112,7 +116,8 @@
         ],
         "yaml.format.enable": true,
         "cSpell.enableFiletypes": [
-            "jinja-html"
+            "jinja-html",
+            "terraform"
         ],
         "cSpell.words": [
             "Gitlab",
@@ -120,11 +125,15 @@
             "Youtube",
             "boto",
             "botocore",
+            "chdir",
             "cvss",
             "dateutil",
             "errno",
+            "getenv",
             "gethostbyname",
             "grecaptcha",
+            "gunicorn",
+            "hmac",
             "initialising",
             "jsonify",
             "opensll",
@@ -138,7 +147,19 @@
             "tzlocal"
         ],
         "sonarlint.disableTelemetry": true,
-        "sonarlint.output.showAnalyzerLogs": true
+        "sonarlint.output.showAnalyzerLogs": true,
+        "files.watcherExclude": {
+            "**/.git/*/**": true,
+            "**/node_modules/*/**": true,
+            "**/.venv/*/**": true
+        },
+        "files.exclude": {
+            "**/.git": true,
+            "**/.venv": true,
+            "**/node_modules": true
+        },
+        "editor.inlineSuggest.enabled": true,
+        "editor.quickSuggestionsDelay": 200
     },
     "launch": {
         "version": "0.3.0",
