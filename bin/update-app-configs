@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -e
+readonly default_env=Dev
+readonly default_namespace=$(id -nu)-$(cat /etc/hostname)
+if [ -f .env ]; then
+    source .env
+fi
+
+APP_ENV=${APP_ENV:-default_env}
+read -p "What is your app env (set via APP_ENV)? [${APP_ENV}]: " app_env
+
+APP_NAME=${APP_NAME:-default_namespace}
+read -p "What is your app name (set via APP_NAME)? [${APP_NAME}]: " app_name
+
+aws ssm put-parameter \
+    --name "/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/app_config" \
+    --type String \
+    --value file://bin/conf/app-config-development.yaml \
+    --overwrite
+
+aws ssm put-parameter \
+    --name "/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/amass_config" \
+    --type String \
+    --value file://bin/conf/amass-config-development.yaml \
+    --overwrite

@@ -1,28 +1,19 @@
 ---
 app:
-  version: 21.6.28
+  version: 21.8.22
+  # http_proxy: proxy.trivialsec.com:3128
+  # https_proxy: proxy.trivialsec.com:3128
   frontend:
     asset_scheme: "https://"
-    asset_domain: assets.trivialsec
+    asset_domain: www.trivialsec.com
     site_scheme: "https://"
-    site_domain: www.trivialsec
+    site_domain: www.trivialsec.com
     app_scheme: "https://"
-    app_domain: app.trivialsec
+    app_domain: app.trivialsec.com
     api_scheme: "https://"
-    api_domain: api.trivialsec
+    api_domain: api.trivialsec.com
     socket_scheme: "wss://"
-    socket_domain: ws.trivialsec
-  backend:
-    asset_scheme: "http://"
-    asset_domain: assets.trivialsec:8080
-    site_scheme: "http://"
-    site_domain: www.trivialsec:8080
-    app_scheme: "http://"
-    app_domain: app.trivialsec:5000
-    api_scheme: "http://"
-    api_domain: api.trivialsec:5081
-    socket_scheme: "wss://"
-    socket_domain: ws.trivialsec:5080
+    socket_domain: ws.trivialsec.com
   nameservers:
     - 1.1.1.1     # Cloudflare
     - 8.8.8.8     # Google
@@ -30,8 +21,9 @@ app:
     - 74.82.42.42 # Hurricane Electric
     - 77.88.8.1   # Yandex.DNS
     - 9.9.9.9     # Quad9
+    # - 169.254.169.253 # AWSDNS
   nmap:
-    ports: 20-23,25,53,57,67-69,80,81,82,107-113,115,118-119,135,137-139,143,153,156,170,177,179,194,209,213,218,220,300,311,366,369-371,383,384,387,389,399,427,433,434,443-445,464,465,475,491,514,515,517,518,520,521,524,530-533,540,546-548,556,560,561,563-585,587,591,593,601,604,623,625,631,635,636,639,641,646-648,653-655,657,660,666,674,688,690,691,706,711,712,749-754,760,782,783,808,832,843,847,848,873,953-61000
+    min_cvss: 0
   public_endpoints:
     - /confirmation
     - /verify
@@ -44,20 +36,22 @@ app:
     - /recovery/regenerate-scratch
 
 redis:
-  host: localhost
-  ssl: False
-  ttl: 10
+  host: redis
+  ssl: True
+  ttl: 300
 
 mysql:
-  database: trivialsec
-  user: root
-  host: localhost
+  internal_database: trivialsec
+  main_user: root
+  main_host: mysql-main
+  replica_user: root
+  replica_host: mysql-replica
 
 aws:
   region_name: ap-southeast-2
   archive_bucket: archive-trivialsec
   public_bucket: assets-trivialsec
-  env_prefix: dev
+  env_prefix:
 
 sendgrid:
   templates:
@@ -82,12 +76,12 @@ stripe:
   account: acct_1HTJBRGZtHTgMn6l
   products:
     enterprise:
-      product_id: prod_I3nN4WJDEcSqKw
+      product_id: prod_I3YKq0kh5u21Gy
     standard:
-      product_id: prod_I3nOpBV12MdUpr
-      monthly: price_1HTfo7GZtHTgMn6lOPINHEyX
-      yearly: price_1HTfo8GZtHTgMn6lOkp6zcev
+      product_id: prod_I3QXcZm1iVM4nZ
+      monthly: price_1HTJfyGZtHTgMn6lhohsngNb
+      yearly: price_1HTJfzGZtHTgMn6lUTHe2gbq
     professional: 
-      product_id: prod_I3nPIEoht0v7Tf
-      monthly: price_1HTfocGZtHTgMn6lqNFx4h5t
-      yearly: price_1HTfocGZtHTgMn6lRyFNwk23
+      product_id: prod_I3Qc8SWBstGEJg
+      monthly: price_1HTJkpGZtHTgMn6lgDC7UDf0
+      yearly: price_1HTJkpGZtHTgMn6l1xGWhRVb
