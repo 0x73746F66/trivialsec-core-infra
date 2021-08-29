@@ -52,6 +52,10 @@
             "name": "MySQL",
             "path": "mysql"
         },
+        {
+            "name": "Scheduler",
+            "path": "scheduler"
+        },
     ],
     "extensions": {
         "recommendations": [
@@ -60,14 +64,11 @@
             "usernamehw.errorlens",
             "hashicorp.terraform",
             "redhat.vscode-xml",
-            "mtxr.sqltools",
             "ms-python.python",
-            "huizhou.githd",
             "ryu1kn.partial-diff",
             "sonarsource.sonarlint-vscode",
             "ms-vscode-remote.vscode-remote-extensionpack",
             "redhat.vscode-yaml",
-            "aws-scripting-guy.cform",
             "snyk-security.vscode-vuln-cost",
             "ms-vscode-remote.remote-containers",
             "redhat.vscode-commons"
@@ -122,7 +123,6 @@
         "cSpell.words": [
             "Gitlab",
             "INET",
-            "Youtube",
             "boto",
             "botocore",
             "chdir",
@@ -138,7 +138,7 @@
             "jsonify",
             "opensll",
             "organisation",
-            "personalizations",
+            "phishtank",
             "pylint",
             "recaptcha",
             "socketio",

@@ -63,11 +63,14 @@ terraform -install-autocomplete
 ```bash
 mkdir -p $HOME/trivialsec
 cd $HOME/trivialsec
+git clone git@gitlab.com:trivialsec/core.git
 git clone git@gitlab.com:trivialsec/appserver.git
 git clone git@gitlab.com:trivialsec/push-service.git
 git clone git@gitlab.com:trivialsec/aws-iac.git
 git clone git@gitlab.com:trivialsec/containers-common.git
 git clone git@gitlab.com:trivialsec/forward-proxy.git
+git clone git@gitlab.com:trivialsec/ingress-controller.git
+git clone git@gitlab.com:trivialsec/mysql.git
 git clone git@gitlab.com:trivialsec/public-api.git
 git clone git@gitlab.com:trivialsec/python-common.git
 git clone git@gitlab.com:trivialsec/python-webhooks.git

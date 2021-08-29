@@ -1,0 +1,11 @@
+---
+public_endpoints:
+  - /confirmation
+  - /verify
+  - /login
+  - /logout
+  - /recovery
+require_authz:
+  - /account/update-billing-email
+  - /account/update-email
+  - /recovery/regenerate-scratch

@@ -1,44 +1,43 @@
 ---
-app:
-  version: 21.6.28
-  # http_proxy: proxy.trivialsec.com:3128
-  # https_proxy: proxy.trivialsec.com:3128
-  frontend:
-    asset_scheme: "https://"
-    asset_domain: assets.trivialsec
-    site_scheme: "https://"
-    site_domain: www.trivialsec
-    app_scheme: "https://"
-    app_domain: app.trivialsec
-    api_scheme: "https://"
-    api_domain: api.trivialsec
-    socket_scheme: "wss://"
-    socket_domain: ws.trivialsec
-  nameservers:
-    - 1.1.1.1     # Cloudflare
-    - 8.8.8.8     # Google
-    - 64.6.64.6   # Verisign
-    - 74.82.42.42 # Hurricane Electric
-    - 77.88.8.1   # Yandex.DNS
-    - 9.9.9.9     # Quad9
-    # - 169.254.169.253 # AWSDNS
-  nmap:
-    min_cvss: 0
-  public_endpoints:
-    - /confirmation
-    - /verify
-    - /login
-    - /logout
-    - /recovery
-  require_authz:
-    - /account/update-billing-email
-    - /account/update-email
-    - /recovery/regenerate-scratch
+version: 21.8.22
+# http_proxy: proxy.trivialsec.com:3128
+# https_proxy: proxy.trivialsec.com:3128
+authz_expiry_seconds: 3600
+session_expiry_minutes: 1440
+session_cookie_name: trivialsec
+queue_wait_timeout: 3
+nameservers:
+  - 1.1.1.1     # Cloudflare
+  - 8.8.8.8     # Google
+  - 64.6.64.6   # Verisign
+  - 74.82.42.42 # Hurricane Electric
+  - 77.88.8.1   # Yandex.DNS
+  - 9.9.9.9     # Quad9
+  # - 169.254.169.253 # AWSDNS
+
+assets:
+  scheme: "https://"
+  host: assets.trivialsec
+website:
+  scheme: "https://"
+  host: www.trivialsec
+appserver:
+  scheme: "https://"
+  host: app.trivialsec
+public-api:
+  scheme: "https://"
+  host: api.trivialsec
+push:
+  scheme: "wss://"
+  host: ws.trivialsec
+
+nmap:
+  min_cvss: 0
 
 redis:
   host: redis
   ssl: False
-  ttl: 10
+  ttl: 300
 
 mysql:
   internal_database: trivialsec
@@ -52,6 +51,11 @@ aws:
   archive_bucket: archive-trivialsec
   public_bucket: assets-trivialsec
   env_prefix: dev
+
+elasticsearch:
+  scheme: "http://"
+  host: elasticsearch
+  port: 9200
 
 sendgrid:
   templates:

@@ -9,17 +9,34 @@ fi
 APP_ENV=${APP_ENV:-default_env}
 read -p "What is your app env (set via APP_ENV)? [${APP_ENV}]: " app_env
 
+if [[ "${app_name:-${APP_NAME}}" == "Prod" ]]; then
+    echo "Prod should not be updated manually, allow Gitlab CI to do this"
+    exit 1
+fi
+
 APP_NAME=${APP_NAME:-default_namespace}
 read -p "What is your app name (set via APP_NAME)? [${APP_NAME}]: " app_name
 
+name="/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/app_config"
+echo "Updating ${name}"
 aws ssm put-parameter \
-    --name "/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/app_config" \
+    --name ${name} \
     --type String \
-    --value file://bin/conf/app-config-development.yaml \
+    --value file://bin/conf/app-config-${app_env:-${APP_ENV}}.yaml \
     --overwrite
 
+name="/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/amass_config"
+echo "Updating ${name}"
 aws ssm put-parameter \
-    --name "/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/amass_config" \
+    --name ${name} \
     --type String \
-    --value file://bin/conf/amass-config-development.yaml \
+    --value file://bin/conf/amass-config.yaml \
+    --overwrite
+
+name="/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/routes_config"
+echo "Updating ${name}"
+aws ssm put-parameter \
+    --name ${name} \
+    --type String \
+    --value file://bin/conf/routes-config.yaml \
     --overwrite
