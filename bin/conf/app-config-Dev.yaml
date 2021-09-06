@@ -53,9 +53,11 @@ aws:
   env_prefix: dev
 
 elasticsearch:
-  scheme: "http://"
-  host: elasticsearch
+  user: elastic
+  scheme: http
   port: 9200
+  hosts:
+    - elasticsearch
 
 sendgrid:
   templates:

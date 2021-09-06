@@ -8,6 +8,21 @@ resource "aws_route53_record" "mx" {
         "20 mailsec.protonmail.ch"
     ]
 }
+resource "aws_route53_record" "caa" {
+    zone_id = local.hosted_zone
+    name    = local.apex_domain
+    type    = "CAA"
+    ttl     = 300
+    records = [
+        "0 issue \"amazon.com\"",
+        "0 issue \"amazonaws.com\"",
+        "0 issue \"amazontrust.com\"",
+        "0 issue \"awstrust.com\"",
+        "0 issue \"letsencrypt.org\"",
+        "0 issuewild \"amazonaws.com\"",
+        "0 issuewild \"letsencrypt.org\""
+    ]
+}
 resource "aws_route53_record" "txt" {
     zone_id = local.hosted_zone
     name    = local.apex_domain
@@ -15,7 +30,7 @@ resource "aws_route53_record" "txt" {
     ttl     = 300
     records = [
         "protonmail-verification=78c74c851e6fd181f96fe6994e6e325672365710",
-        "trivialsec=afcd1bcf5069abe16ebb389e4541a6258c3747937e51e4bcbb6d77e9",
+        "trivialsec=none",
         "v=spf1 include:_spf.protonmail.ch mx ~all",
         "stripe-verification=4935d976effc22438dcf972d5f414dec1436b7d950d5239348e8330334749d90",
     ]

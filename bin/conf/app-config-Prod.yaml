@@ -53,9 +53,11 @@ aws:
   env_prefix:
 
 elasticsearch:
-  scheme: "https://"
-  host: elasticsearch
+  user: elastic
+  scheme: https
   port: 9200
+  hosts:
+    - elasticsearch
 
 sendgrid:
   templates:

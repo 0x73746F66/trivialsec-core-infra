@@ -3,8 +3,18 @@ variable "aws_secret_access_key" {
   type        = string
   sensitive   = true
 }
-variable "mysql_password" {
-  description = "MYSQL_PASSWORD"
+variable "elasticsearch_password" {
+  description = "ELASTIC_PASSWORD"
+  type        = string
+  sensitive   = true
+}
+variable "mysql_main_password" {
+  description = "MYSQL_MAIN_PASSWORD"
+  type        = string
+  sensitive   = true
+}
+variable "mysql_replica_password" {
+  description = "MYSQL_REPLICA_PASSWORD"
   type        = string
   sensitive   = true
 }

@@ -5,6 +5,12 @@ variable "aws_access_key_id" {
 variable "app_env" {
   description = "default Dev"
   type        = string
+  default     = "Dev"
+}
+variable "app_name" {
+  description = "default trivialsec"
+  type        = string
+  default     = "trivialsec"
 }
 variable "recaptcha_site_key" {
   description = ""
