@@ -68,3 +68,18 @@ variable "whoisxmlapi_key" {
   type        = string
   sensitive   = true
 }
+variable "domaintools_key" {
+  description = ""
+  type        = string
+  sensitive   = true
+}
+variable "domaintools_user" {
+  description = ""
+  type        = string
+  sensitive   = true
+}
+variable "domainsdb_key" {
+  description = ""
+  type        = string
+  sensitive   = true
+}

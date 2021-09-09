@@ -115,6 +115,33 @@ resource "aws_ssm_parameter" "whoisxmlapi_key" {
   }
   overwrite   = true
 }
+resource "aws_ssm_parameter" "domaintools_key" {
+  name        = "/${var.app_env}/Deploy/${var.app_name}/domaintools_key"
+  type        = "SecureString"
+  value       = var.domaintools_key
+  tags = {
+    cost-center = "saas"
+  }
+  overwrite   = true
+}
+resource "aws_ssm_parameter" "domaintools_user" {
+  name        = "/${var.app_env}/Deploy/${var.app_name}/domaintools_user"
+  type        = "String"
+  value       = var.domaintools_user
+  tags = {
+    cost-center = "saas"
+  }
+  overwrite   = true
+}
+resource "aws_ssm_parameter" "domainsdb_key" {
+  name        = "/${var.app_env}/Deploy/${var.app_name}/domainsdb_key"
+  type        = "SecureString"
+  value       = var.domainsdb_key
+  tags = {
+    cost-center = "saas"
+  }
+  overwrite   = true
+}
 resource "aws_ssm_parameter" "phishtank_username" {
   name        = "/${var.app_env}/Deploy/${var.app_name}/phishtank_username"
   type        = "String"
