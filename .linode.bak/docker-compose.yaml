@@ -1,7 +1,6 @@
 version: '3.7'
 x-defaults: &defaults
   restart: unless-stopped
-  network_mode: host
   logging:
     options:
       max-size: "10m"
@@ -34,6 +33,11 @@ services:
       ADMIN_EMAIL: support@trivialsec.com
     expose:
       - 8080
+    networks:
+      default:
+        aliases:
+          - statping
+          - status
 
   ghost:
     <<: *defaults
@@ -45,6 +49,11 @@ services:
       url: https://www.langton.cloud
     expose:
       - 2368
+    networks:
+      default:
+        aliases:
+          - ghost
+          - blog
 
   nginx:
     <<: *defaults
@@ -54,9 +63,9 @@ services:
       - /root/nginx/config/nginx.conf:/etc/nginx/nginx.conf
       - /root/letsencrypt/conf:/etc/letsencrypt
       - /root/letsencrypt/www:/var/www/certbot
-    expose:
-      - 80
-      - 443
+    ports:
+      - "80:80"
+      - "443:443"
     command: '/bin/sh -c ''while :; do sleep 10m & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     cap_drop:
       - ALL
@@ -91,7 +100,30 @@ services:
       - /root/gitlab-cache:/cache:rw
       - /root/gitlab-runner-config:/etc/gitlab-runner:rw
 
+  docs:
+    <<: *defaults
+    image: ghost:4-alpine
+    container_name: docs
+    volumes:
+      - /root/docs:/var/lib/ghost/content
+    environment:
+      url: https://docs.trivialsec.com
+    expose:
+      - 2368
+    networks:
+      default:
+        aliases:
+          - docs
+
 volumes:
   db:
     external: true
     name: linode-slack-db
+  gitlab-cache:
+    external: true
+    name: gitlab-cache
+
+networks:
+  default:
+    external:
+      name: containers

@@ -56,6 +56,10 @@
             "name": "Scheduler",
             "path": "scheduler"
         },
+        {
+            "name": "Docs Theme",
+            "path": "docs-theme"
+        },
     ],
     "extensions": {
         "recommendations": [

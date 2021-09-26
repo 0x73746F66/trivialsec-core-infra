@@ -161,3 +161,31 @@ resource "aws_route53_record" "mail_mx" {
     ttl     = 300
     records = ["10 smtp5.mxmailer.org."]
 }
+resource "aws_route53_record" "status_a" {
+    zone_id = local.hosted_zone
+    name    = "status.${local.apex_domain}"
+    type    = "A"
+    ttl     = 300
+    records = ["172.105.188.231"]
+}
+resource "aws_route53_record" "status_aaaa" {
+    zone_id = local.hosted_zone
+    name    = "status.${local.apex_domain}"
+    type    = "AAAA"
+    ttl     = 300
+    records = ["2400:8907::f03c:92ff:fe2b:01c3"]
+}
+resource "aws_route53_record" "docs_a" {
+    zone_id = local.hosted_zone
+    name    = "docs.${local.apex_domain}"
+    type    = "A"
+    ttl     = 300
+    records = ["172.105.188.231"]
+}
+resource "aws_route53_record" "docs_aaaa" {
+    zone_id = local.hosted_zone
+    name    = "docs.${local.apex_domain}"
+    type    = "AAAA"
+    ttl     = 300
+    records = ["2400:8907::f03c:92ff:fe2b:01c3"]
+}
