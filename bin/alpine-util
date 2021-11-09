@@ -1,0 +1,237 @@
+#!/bin/sh
+
+function dig_public_ip() {
+    apk -q add --update bind-tools
+    echo $(dig +short myip.opendns.com @resolver1.opendns.com)
+}
+function system_private_ip() {
+    echo $(/sbin/ifconfig eth0 | awk '/inet / { print $2 }' | sed 's/addr://')
+}
+function network_interface() {
+    cat /etc/network/interfaces | egrep "iface .* static" | awk '{print $2;exit}'
+}
+function random_string {
+    if [ ! -n "$1" ];
+        then length=20
+        else length="$1"
+    fi
+    echo "$(</dev/urandom tr -dc A-Za-z0-9 | head -c $length)"
+}
+function patch_os() {
+    echo "Patching..."
+    apk upgrade --update-cache --available
+}
+
+function enable_auto_updates() {
+    echo "enabling auto updates..."
+    cat > /etc/periodic/daily/auto_update << EOF
+#!/bin/sh
+apk update -q && apk upgrade --update-cache --available -q
+EOF
+    chmod a+x /etc/periodic/daily/auto_update
+}
+function mysql_create_user {
+    [ ! -n "$1" ] && {
+        printf "mysql_create_user() requires the root password as its first argument\n"
+        return 1;
+    }
+    [ ! -n "$2" ] && {
+        printf "mysql_create_user() requires username as the second argument\n"
+        return 1;
+    }
+    [ ! -n "$3" ] && {
+        printf "mysql_create_user() requires a password as the third argument\n"
+        return 1;
+    }
+    local db_root_password="$1"
+    local db_username="$2"
+    local db_user_password="$3"
+    echo "CREATE USER '${db_username}'@'localhost' IDENTIFIED BY '${db_user_password}';" | mysql -u root -p"${db_root_password}"
+}
+function mysql_grant_user {
+    [ ! -n "$1" ] && {
+        printf "mysql_grant_user() requires the root password as its first argument\n"
+        return 1;
+    }
+    [ ! -n "$2" ] && {
+        printf "mysql_grant_user() requires username as the second argument\n"
+        return 1;
+    }
+    [ ! -n "$3" ] && {
+        printf "mysql_grant_user() requires a database as the third argument\n"
+        return 1;
+    }
+    local db_root_password="$1"
+    local db_username="$2"
+    local db_user_password="$3"
+    echo "GRANT ALL PRIVILEGES ON ${db_user_password}.* TO '${db_username}'@'localhost';" | mysql -u root -p"${db_root_password}"
+    echo "FLUSH PRIVILEGES;" | mysql -u root -p"${db_root_password}"
+}
+function mysql_install() {
+    [ ! -n "$1" ] && {
+        printf "mysql_install() requires the db_root_password as its first argument\n"
+        return 1;
+    }
+    local db_root_password="$1"
+    local conf_path=${2:-/etc/my.cnf.d/custom.cnf}
+    local secure_mysql
+    echo "Setting up mysql..."
+    apk -q add --update mysql mysql-client expect
+    rm -fR /var/lib/mysql
+    mkdir -p /run/mysqld /var/lib/mysql
+    chown mysql: /run/mysqld /var/lib/mysql
+    cat > ${conf_path} <<CONFIG
+[mysqld]
+user = mysql
+datadir = /var/lib/mysql
+bind-address = 0.0.0.0
+skip-networking
+ignore-builtin-innodb
+default-storage-engine = myisam
+default-tmp-storage-engine = myisam
+CONFIG
+    mysql_install_db
+    /usr/bin/mysqld --print-defaults
+    rc-service mariadb start
+    rc-update add mariadb default
+    secure_mysql=$(expect -c "
+set timeout 3
+spawn mysql_secure_installation
+
+expect \"Enter current password for root (enter for none):\"
+send \"\r\"
+
+expect \"root password?\"
+send \"y\r\"
+
+expect \"New password:\"
+send \"${db_root_password}\r\"
+
+expect \"Re-enter new password:\"
+send \"${db_root_password}\r\"
+
+expect \"Remove anonymous users?\"
+send \"y\r\"
+
+expect \"Disallow root login remotely?\"
+send \"n\r\"
+
+expect \"Remove test database and access to it?\"
+send \"y\r\"
+
+expect \"Reload privilege tables now?\"
+send \"y\r\"
+
+expect eof
+")
+    echo ${secure_mysql}
+    apk -q del expect
+
+}
+function install_awscli() {
+    echo "Setup awscli..."
+    apk -q add --update py-pip
+    pip install -U pip
+    pip install pipx
+    pipx install awscli
+}
+function setup_hostname() {
+    [ ! -n "$1" ] && {
+        printf "setup_hostname() requires the hostname as its first argument\n"
+        return 1;
+    }
+    local hostname="$1"
+    local public_ip=$(dig_public_ip)
+    local private_ip=$(system_private_ip)
+    echo "Setting hostname..."
+    echo ${hostname} > /etc/hostname
+    hostname -F /etc/hostname
+    echo $public_ip ${hostname} | tee -a /etc/hosts
+    echo $private_ip ${hostname} | tee -a /etc/hosts
+}
+function setup_timezone() {
+    [ ! -n "$1" ] && {
+        printf "setup_timezone() requires the timezone as its first argument\n"
+        return 1;
+    }
+    local timezone="$1"
+    echo "Setting up timezone..."
+    apk -q add tzdata
+    cp /usr/share/zoneinfo/${timezone} /etc/localtime
+    echo ${timezone} > /etc/timezone
+    apk -q del tzdata
+}
+function setup_firewall() {
+    local interface=${1:-$(network_interface)}
+    echo "Setting up firewall..."
+    apk -q add --update shorewall
+    # Add firewall and net (public) zone
+    echo "net		ipv4" >> /etc/shorewall/zones
+    # Link net zone to public interface
+    echo "net		${interface}" >> /etc/shorewall/interfaces
+    # Authorize outbound traffic
+    echo "\$FW		net		ACCEPT" >> /etc/shorewall/policy
+    # DROP all traffic coming from outside
+    echo "net		all		DROP	info" >> /etc/shorewall/policy
+    # REJECT anything else
+    echo "all		all		REJECT	info" >> /etc/shorewall/policy
+    rc-update add shorewall default
+    sed -i -e "s/STARTUP_ENABLED=No/STARTUP_ENABLED=Yes/" /etc/shorewall/shorewall.conf
+    rc-service shorewall start
+}
+function open_firewall_port() {
+    [ ! -n "$1" ] && {
+        printf "open_firewall_port() requires the tcp_port as its first argument\n"
+        return 1;
+    }
+    local tcp_port=$1
+    echo "ACCEPT	net		\$FW		tcp ${tcp_port}" >> /etc/shorewall/rules
+    rc-service shorewall restart
+}
+function harden_ssh() {
+    echo "Harden SSH access..."
+    sed -i -e "s/#*PasswordAuthentication [no]*[yes]*/PasswordAuthentication no/" /etc/ssh/sshd_config
+    sed -i 's/#Banner none/Banner \/etc\/ssh\/banner/' /etc/ssh/sshd_config
+    echo 'AddressFamily inet' | tee -a /etc/ssh/sshd_config
+    cat << EOT > /etc/ssh/banner
+#################################################################
+#                 Welcome to ${FQDN}
+# After this point you agree that all your activity is recorded
+#################################################################
+EOT
+    echo "" > /etc/motd
+    rc-service sshd restart
+}
+function stackscript_cleanup {
+    rm -rf /tmp/* /var/cache/apk/*
+    rm /root/StackScript
+    rm /root/ssinclude*
+}
+function enable_fail2ban() {
+    local conf_path=${1:-/etc/fail2ban}
+    echo "Setting up fail2ban..."
+    apk -q add --update fail2ban
+
+    cp ${conf_path}/fail2ban.conf ${conf_path}/fail2ban.local
+    cp ${conf_path}/jail.conf ${conf_path}/jail.local
+    sed -i -e "s/backend = auto/backend = systemd/" ${conf_path}/jail.local
+    rc-update add fail2ban default
+    /etc/init.d/fail2ban start
+}
+function setup_swap() {
+    [ ! -n "$1" ] && {
+        printf "setup_swap() requires the total_ram as its first argument\n"
+        return 1;
+    }
+    local total_ram=$1 
+    local block_count=$((${total_ram}*1024))
+    echo "Setup swap..."
+    echo 1 > /proc/sys/vm/swappiness
+    # Create SWAP File as 
+    fallocate -l ${total_ram}\M /swapfile
+    dd if=/dev/zero of=/swapfile bs=1024 count=${block_count}
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+
+}

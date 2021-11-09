@@ -77,6 +77,7 @@ venv.bak/
 **/.tf*
 **/terraform.*
 tf*.json
+.lh/
 
 # sensitive
 **/*.db
