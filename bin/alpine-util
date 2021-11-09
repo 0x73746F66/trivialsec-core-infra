@@ -78,8 +78,8 @@ function mysql_install() {
     echo "Setting up mysql..."
     apk -q add --update mysql mysql-client expect
     rm -fR /var/lib/mysql
-    mkdir -p /run/mysqld /var/lib/mysql
-    chown mysql: /run/mysqld /var/lib/mysql
+    mkdir -p /run/mysqld /var/lib/mysql /var/log/mysql
+    chown mysql: /run/mysqld /var/lib/mysql /var/log/mysql
     cat > ${conf_path} <<CONFIG
 [mysqld]
 user = mysql
