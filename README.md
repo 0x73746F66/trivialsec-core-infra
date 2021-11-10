@@ -35,7 +35,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] 
 sudo apt update && sudo apt install python3-pip python3-venv docker-ce docker-ce-cli containerd.io docker-compose
 sudo usermod -aG docker $(id -un)
 sudo systemctl enable docker
-pip install -q -U pip pipx setuptools wheel
+pip install -q -U pip pipx setuptools wheel 
 pipx install awscli
 pipx install pylint
 pipx install semgrep
@@ -81,14 +81,11 @@ git clone git@gitlab.com:trivialsec/workers.git
 
 ## Create VS Code workspace
 
-Create `.trivialsec.code-workspace` file with contents;
-
-```json
-
-```
+Create `.trivialsec.code-workspace` file with contents of the file in this repo, place it in `$HOME/trivialsec`
 
 ## Create your own AWS Service account
-using the CloudFormation template in the `aws-iac` repo and then configure your awscli.
+
+old method: using the CloudFormation template in the `aws-iac` repo and then configure your awscli.
 
 ## Get the platform running locally
 
@@ -100,3 +97,20 @@ In `workers` run `make package`.
 In `push-service`, `app-server`, `public-api`, and `workers` projects run `make build` and `make up`.
 
 For stripe development webhooks, run `make stripe-dev` in `app-server` project after the `app-server` itself is running.
+
+## Note on linode PAT
+
+The UI method for creating PAT do not allow you to add firewall resource permissions.
+
+To create Linode Personal API Token (PAT) with 'read_write' firewall scope (only)
+
+```sh
+curl -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -X POST -d '{
+        "scopes": "firewall:read_write",
+        "expiry": "2021-08-01T13:46:32",
+        "label": "firewall-read_write"
+    }' \
+    https://api.linode.com/v4/profile/tokens
+```
