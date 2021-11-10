@@ -102,15 +102,47 @@ For stripe development webhooks, run `make stripe-dev` in `app-server` project a
 
 The UI method for creating PAT do not allow you to add firewall resource permissions.
 
-To create Linode Personal API Token (PAT) with 'read_write' firewall scope (only)
+To create Linode Personal API Token (PAT) with:
 
 ```sh
 curl -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $TOKEN" \
+    -H "Authorization: Bearer $TF_VAR_linode_token" \
     -X POST -d '{
-        "scopes": "firewall:read_write",
-        "expiry": "2021-08-01T13:46:32",
-        "label": "firewall-read_write"
+        "scopes": "firewall:read_write maintenance:read_only account:read_only domains:read_only events:read_only images:read_write ips:read_write linodes:read_write longview:read_only stackscripts:read_write volumes:read_write",
+        "expiry": "2080-01-01T23:59:59",
+        "label": "stof-pat"
     }' \
     https://api.linode.com/v4/profile/tokens
+```
+
+https://www.linode.com/docs/api/#oauth-reference
+
+```
+account:read_only          Allows access to GET information about your Account.
+account:read_write         Allows access to all endpoints related to your Account.
+domains:read_only          Allows access to GET Domains on your Account.
+domains:read_write         Allows access to all Domain endpoints.
+events:read_only           Allows access to GET your Events.
+events:read_write          Allows access to all endpoints related to your Events.
+firewall:read_only         Allows access to GET information about your Firewalls.
+firewall:read_write        Allows access to all Firewall endpoints.
+images:read_only           Allows access to GET your Images.
+images:read_write          Allows access to all endpoints related to your Images.
+ips:read_only              Allows access to GET your ips.
+ips:read_write             Allows access to all endpoints related to your ips.
+linodes:read_only          Allows access to GET Linodes on your Account.
+linodes:read_write         Allow access to all endpoints related to your Linodes.
+lke:read_only              Allows access to GET LKE Clusters on your Account.
+lke:read_write             Allows access to all endpoints related to LKE Clusters on your Account.
+longview:read_only         Allows access to GET your Longview Clients.
+longview:read_write        Allows access to all endpoints related to your Longview Clients.
+maintenance:read_only      Allows access to GET information about Maintenance on your account.
+nodebalancers:read_only    Allows access to GET NodeBalancers on your Account.
+nodebalancers:read_write   Allows access to all NodeBalancer endpoints.
+object_storage:read_only   Allows access to GET information related to your Object Storage.
+object_storage:read_write  Allows access to all Object Storage endpoints.
+stackscripts:read_only     Allows access to GET your StackScripts.
+stackscripts:read_write    Allows access to all endpoints related to your StackScripts.
+volumes:read_only          Allows access to GET your Volumes.
+volumes:read_write         Allows access to all endpoints related to your Volumes.
 ```
