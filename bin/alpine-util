@@ -67,29 +67,6 @@ function mysql_grant_user {
     echo "GRANT ALL PRIVILEGES ON ${db_user_password}.* TO '${db_username}'@'localhost';" | mysql -u root -p"${db_root_password}"
     echo "FLUSH PRIVILEGES;" | mysql -u root -p"${db_root_password}"
 }
-function mysql_query {
-    [ ! -n "$1" ] && {
-        printf "mysql_query() requires the sql_stmt as its first argument\n"
-        return 1;
-    }
-    [ ! -n "$2" ] && {
-        printf "mysql_query() requires username as the second argument\n"
-        return 1;
-    }
-    [ ! -n "$3" ] && {
-        printf "mysql_query() requires a database as the third argument\n"
-        return 1;
-    }
-    [ ! -n "$4" ] && {
-        printf "mysql_query() requires the root password as its fourth argument\n"
-        return 1;
-    }
-    local sql_stmt="$1"
-    local db_user=$2
-    local database=$3
-    local db_root_password=$4
-    echo $(mysql -D${database} -u${db_user} -p"${db_root_password}" -Bse "${sql_stmt};")
-}
 function mysql_install() {
     [ ! -n "$1" ] && {
         printf "mysql_install() requires the db_root_password as its first argument\n"
