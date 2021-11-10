@@ -76,7 +76,7 @@ function mysql_install() {
     local conf_path=${2:-/etc/my.cnf.d/custom.cnf}
     local secure_mysql
     echo "Setting up mysql..."
-    apk -q add --update mysql mysql-client expect
+    apk -q add --update mysql mysql-client
     rm -fR /var/lib/mysql
     mkdir -p /run/mysqld /var/lib/mysql /var/log/mysql
     chown mysql: /run/mysqld /var/lib/mysql /var/log/mysql
@@ -86,6 +86,7 @@ user = mysql
 datadir = /var/lib/mysql
 bind-address = 0.0.0.0
 ignore-builtin-innodb
+skip-networking = OFF
 default-storage-engine = myisam
 default-tmp-storage-engine = myisam
 CONFIG
@@ -93,37 +94,7 @@ CONFIG
     /usr/bin/mysqld --print-defaults
     rc-service mariadb start
     rc-update add mariadb default
-    secure_mysql=$(expect -c "
-set timeout 3
-spawn mysql_secure_installation
-
-expect \"Enter current password for root (enter for none):\"
-send \"\r\"
-
-expect \"root password?\"
-send \"y\r\"
-
-expect \"New password:\"
-send \"${db_root_password}\r\"
-
-expect \"Re-enter new password:\"
-send \"${db_root_password}\r\"
-
-expect \"Remove anonymous users?\"
-send \"y\r\"
-
-expect \"Disallow root login remotely?\"
-send \"n\r\"
-
-expect \"Remove test database and access to it?\"
-send \"y\r\"
-
-expect \"Reload privilege tables now?\"
-send \"y\r\"
-
-expect eof
-")
-    echo ${secure_mysql}
+    mysql -Bse "DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); DROP DATABASE IF EXISTS test; DELETE FROM mysql.db WHERE Db='test' OR Db='test_%'; FLUSH PRIVILEGES;"
     apk -q del expect
 
 }
