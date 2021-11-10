@@ -6,5 +6,5 @@ resource "linode_stackscript" "alpine_stackscript" {
   description = "Creates bash utility functions suitable for Alpine ash"
   script = data.local_file.alpine_stackscript.content
   images = [local.linode_default_image]
-  rev_note = "v24"
+  rev_note = "v25"
 }
