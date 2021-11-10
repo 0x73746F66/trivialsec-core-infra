@@ -196,24 +196,6 @@ function setup_firewall() {
     rc-update add shorewall default
     rc-service shorewall start
 }
-function allow_ip_address() {
-    [ ! -n "$1" ] && {
-        printf "allow_ip_address() requires the ip_addr as its first argument\n"
-        return 1;
-    }
-    [ ! -n "$2" ] && {
-        printf "allow_ip_address() requires the port as its second argument\n"
-        return 1;
-    }
-    local ip_addr=${1}
-    local port=${2}
-    echo "Configuring iptables..."
-    local public_ip=$(linode_ip)
-    apk -q add --update iptables
-    rc-update add iptables default
-    iptables -A INPUT -p tcp -s ${ip_addr} --sport 1024:65535 -d ${public_ip} --dport ${port} -m state --state NEW,ESTABLISHED -j ACCEPT
-    iptables -A OUTPUT -p tcp -s ${public_ip} --sport ${port} -d ${ip_addr} --dport 1024:65535 -m state --state ESTABLISHED -j ACCEPT
-}
 function harden_ssh() {
     echo "Harden SSH access..."
     sed -i -e "s/#*PasswordAuthentication [no]*[yes]*/PasswordAuthentication no/" /etc/ssh/sshd_config
