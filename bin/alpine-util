@@ -91,11 +91,13 @@ default-storage-engine = myisam
 default-tmp-storage-engine = myisam
 CONFIG
     mysql_install_db
+    sed -i -e "s/skip-networking/#skip-networking/" /etc/my.cnf.d/mariadb-server.cnf
     /usr/bin/mysqld --print-defaults
     rc-service mariadb start
     rc-update add mariadb default
-    mysql -Bse "DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); DROP DATABASE IF EXISTS test; DELETE FROM mysql.db WHERE Db='test' OR Db='test_%'; FLUSH PRIVILEGES;"
-    apk -q del expect
+    mysql -Bse "DROP DATABASE IF EXISTS test;"
+    mysql -D mysql -Bse "DELETE FROM db WHERE Db='test' OR Db='test_%';"
+    mysql -D mysql -Bse "DELETE FROM user WHERE User=''; FLUSH PRIVILEGES;"
 
 }
 function install_awscli() {
