@@ -21,7 +21,6 @@ function patch_os() {
     echo "Patching..."
     apk upgrade --update-cache --available
 }
-
 function enable_auto_updates() {
     echo "enabling auto updates..."
     cat > /etc/periodic/daily/auto_update << EOF
@@ -101,10 +100,10 @@ CONFIG
 
 }
 function install_awscli() {
-    echo "Setup awscli..."
+    echo "Install awscli..."
     apk -q add --update py-pip
-    pip install -U pip
-    pip install pipx
+    python3 -m pip install -U pip
+    python3 -m pip install pipx
     pipx install awscli
 }
 function setup_hostname() {
@@ -186,8 +185,39 @@ function enable_fail2ban() {
     echo "Setting up fail2ban..."
     apk -q add --update fail2ban
     cp ${conf_path}/fail2ban.conf ${conf_path}/fail2ban.local
-    cp ${conf_path}/jail.conf ${conf_path}/jail.local
-    sed -i -e "s/backend = auto/backend = systemd/" ${conf_path}/jail.local
+    cat > ${conf_path}/jail.d/alpine-ssh.conf <<CONFIG
+[sshd]
+enabled  = true
+filter   = alpine-sshd
+port     = ssh
+logpath  = /var/log/messages
+maxretry = 2
+bantime  = 24h
+[sshd-ddos]
+enabled  = true
+filter   = alpine-sshd-ddos
+port     = ssh
+logpath  = /var/log/messages
+maxretry = 2
+bantime  = 24h
+[sshd-key]
+enabled  = true
+filter   = alpine-sshd-key
+port     = ssh
+logpath  = /var/log/messages
+maxretry = 2
+bantime  = 24h
+CONFIG
+    cat > ${conf_path}/filter.d/alpine-sshd-key.conf <<CONFIG
+[INCLUDES]
+before = common.conf
+[Definition]
+_daemon = sshd
+failregex = (Connection closed by|Disconnected from) authenticating user .* <HOST> port \d* \[preauth\]
+ignoreregex =
+[Init]
+maxlines = 10
+CONFIG
     rc-update add fail2ban default
     /etc/init.d/fail2ban start
 }
@@ -214,4 +244,18 @@ function ssm_get_parameter() {
     }
     local parameter_name=$1 
     aws ssm get-parameter --name ${parameter_name} --output text --with-decryption --query 'Parameter.Value'
+}
+function install_certbot() {
+    echo "Install Certbot..."
+    apk -q add --update augeas-libs py-pip python3-dev libffi-dev
+    python3 -m pip install -U pip
+    python3 -m pip install -U pipx
+    pipx install certbot
+    pipx inject certbot certbot-nginx
+    pipx inject -f certbot certbot-route53
+    cat > /etc/periodic/monthly/certbot <<CONFIG
+#!/bin/sh
+pipx upgrade certbot
+CONFIG
+
 }
