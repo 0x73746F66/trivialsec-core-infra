@@ -22,3 +22,11 @@ data "terraform_remote_state" "elasticsearch" {
     region      = "ap-southeast-2"
   }
 }
+data "terraform_remote_state" "public_api" {
+  backend = "s3"
+  config = {
+    bucket      = "stateful-trivialsec"
+    key         = "terraform/public-api"
+    region      = "ap-southeast-2"
+  }
+}

@@ -248,6 +248,7 @@ http {
     }
     sendfile        off;
     #tcp_nopush     on;
+    resolver        9.9.9.9 1.1.1.1 8.8.8.8 [::1] valid=30s;
     keepalive_timeout  65;
     gzip  on;
     gzip_types
@@ -354,10 +355,7 @@ uSWOxsjNRxvEe2J94H3o1ilNvHjhd1uj9tw5Y3zBss2j6NG/UMpVWdTHEkO5/owk
 tylRRVJiJKNyTRMa1+oAGDxQi2Zw2SDM92vAg5oQfnnPfKuwB44BbTMCAQI=
 -----END DH PARAMETERS-----
 CONFIG
-    nginx -t || (
-        echo "bad nginx config"
-        exit 1
-    )
+
 }
 function install_modsec() {
     echo "Installing ModSec Library"
