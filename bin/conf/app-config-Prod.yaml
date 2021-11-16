@@ -35,9 +35,10 @@ nmap:
   min_cvss: 0
 
 redis:
-  host: redis
-  ssl: True
+  host: prd-cache.trivialsec.com
+  ssl: False
   ttl: 300
+  user: trivialsec
 
 mysql:
   internal_database: trivialsec
