@@ -38,6 +38,7 @@ redis:
   host: redis
   ssl: False
   ttl: 300
+  user: trivialsec
 
 mysql:
   internal_database: trivialsec

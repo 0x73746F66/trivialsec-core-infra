@@ -65,6 +65,15 @@ resource "linode_firewall" "saas_firewall" {
     ipv6     = concat([data.terraform_remote_state.waf.outputs.ingress_ipv6], local.fw_ipv6_allowed)
   }
 
+  inbound {
+    label    = "allow-REDIS"
+    action   = "ACCEPT"
+    protocol = "TCP"
+    ports    = "6379"
+    ipv4     = concat(data.terraform_remote_state.public_api.outputs.public_api_ipv4, local.fw_ipv4_allowed)
+    ipv6     = concat([data.terraform_remote_state.public_api.outputs.public_api_ipv6], local.fw_ipv6_allowed)
+  }
+
   inbound_policy = "DROP"
   outbound_policy = "ACCEPT"
 
@@ -74,5 +83,6 @@ resource "linode_firewall" "saas_firewall" {
       data.terraform_remote_state.mysql.outputs.mysql_main_id,
       data.terraform_remote_state.mysql.outputs.mysql_replica_id,
       data.terraform_remote_state.elasticsearch.outputs.es_id,
+      data.terraform_remote_state.redis.outputs.redis_id,
   ]
 }
