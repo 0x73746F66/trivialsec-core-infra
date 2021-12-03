@@ -43,8 +43,8 @@ resource "linode_firewall" "saas_firewall" {
     action   = "ACCEPT"
     protocol = "TCP"
     ports    = "3306"
-    ipv4     = concat(data.terraform_remote_state.public_api.outputs.public_api_ipv4, data.terraform_remote_state.mysql.outputs.mysql_main_ipv4, data.terraform_remote_state.mysql.outputs.mysql_replica_ipv4, local.fw_ipv4_allowed)
-    ipv6     = concat([data.terraform_remote_state.public_api.outputs.public_api_ipv6, data.terraform_remote_state.mysql.outputs.mysql_main_ipv6, data.terraform_remote_state.mysql.outputs.mysql_replica_ipv6], local.fw_ipv6_allowed)
+    ipv4     = concat(data.terraform_remote_state.public_api.outputs.public_api_ipv4, data.terraform_remote_state.appserver.outputs.appserver_ipv4, data.terraform_remote_state.mysql.outputs.mysql_main_ipv4, data.terraform_remote_state.mysql.outputs.mysql_replica_ipv4, local.fw_ipv4_allowed)
+    ipv6     = concat([data.terraform_remote_state.public_api.outputs.public_api_ipv6, data.terraform_remote_state.appserver.outputs.appserver_ipv6, data.terraform_remote_state.mysql.outputs.mysql_main_ipv6, data.terraform_remote_state.mysql.outputs.mysql_replica_ipv6], local.fw_ipv6_allowed)
   }
 
   inbound {
@@ -70,14 +70,15 @@ resource "linode_firewall" "saas_firewall" {
     action   = "ACCEPT"
     protocol = "TCP"
     ports    = "6379"
-    ipv4     = concat(data.terraform_remote_state.public_api.outputs.public_api_ipv4, local.fw_ipv4_allowed)
-    ipv6     = concat([data.terraform_remote_state.public_api.outputs.public_api_ipv6], local.fw_ipv6_allowed)
+    ipv4     = concat(data.terraform_remote_state.public_api.outputs.public_api_ipv4, data.terraform_remote_state.appserver.outputs.appserver_ipv4, local.fw_ipv4_allowed)
+    ipv6     = concat([data.terraform_remote_state.public_api.outputs.public_api_ipv6, data.terraform_remote_state.appserver.outputs.appserver_ipv6], local.fw_ipv6_allowed)
   }
 
   inbound_policy = "DROP"
   outbound_policy = "ACCEPT"
 
   linodes = [
+      data.terraform_remote_state.appserver.outputs.appserver_id,
       data.terraform_remote_state.public_api.outputs.public_api_id,
       data.terraform_remote_state.waf.outputs.ingress_id,
       data.terraform_remote_state.mysql.outputs.mysql_main_id,

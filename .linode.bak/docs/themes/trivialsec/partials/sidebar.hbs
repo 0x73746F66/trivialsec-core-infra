@@ -1,0 +1,27 @@
+<div class="sidebar z1 p3 lg-py4 border-box bg-white box-shadow overflow-auto"{{#if @site.cover_image}} style="background-image: url({{@site.cover_image}});"{{/if}}>
+
+    <div class="sidebar-inner js-sidebar-inner lg-mb3">
+
+        {{! The big featured header }}
+        <header class="main-header">
+            {{#if @blog.logo}}
+                <a class="blog-logo hop5" href="{{@blog.url}}"><img src="{{@blog.logo}}" alt="{{@blog.title}}" /></a>
+                <h1>{{@blog.title}}</h1>
+            {{else}}
+                {{#is "home"}}
+                    <h1 class="page-title h1 mt0"><a class="black" href="{{@blog.url}}">{{@blog.title}}</a></h1>
+                {{else}}
+                    <h2 class="page-title h1 mt0"><a class="black" href="{{@blog.url}}">{{@blog.title}}</a></h2>
+                {{/is}}
+            {{/if}}
+            <h3 class="page-description h3 light mb3">{{@blog.description}}</h3>
+        </header>
+        {{navigation}}
+
+    </div>
+
+    <footer class="sidebar-footer h6 clearfix light border-box lg-show js-sidebar-footer">
+        <div class="copyright"><a href="https://www.trivialsec.com" target="_blank">Trivial Security Pty Ltd</a> &copy; 2020-{{date format="YYYY"}}. All Rights Reserved.</div>
+    </footer>
+
+</div>

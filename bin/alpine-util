@@ -157,9 +157,8 @@ function setup_firewall() {
     # DROP all traffic coming from outside
     echo "net		all		DROP	info" >> /etc/shorewall/policy
     echo "ACCEPT  \$FW             net             tcp 53" >> /etc/shorewall/rules
-    echo "ACCEPT  \$FW             net             udp 53" >> /etc/shorewall/rules
     for port in ${ports}; do
-        echo "ACCEPT	net		\$FW		tcp ${port}" >> /etc/shorewall/rules
+        echo "ACCEPT  \$FW             net             tcp ${port}" >> /etc/shorewall/rules
     done
     # REJECT anything else (must be last)
     echo "all		all		REJECT	info" >> /etc/shorewall/policy

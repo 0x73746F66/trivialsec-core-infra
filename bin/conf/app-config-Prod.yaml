@@ -29,7 +29,7 @@ public-api:
   host: api.trivialsec.com
 push:
   scheme: "wss://"
-  host: ws.trivialsec.com
+  host: push.trivialsec.com
 
 nmap:
   min_cvss: 0
@@ -43,9 +43,9 @@ redis:
 mysql:
   internal_database: trivialsec
   main_user: root
-  main_host: mysql-main
+  main_host: prd-main.trivialsec.com
   replica_user: root
-  replica_host: mysql-replica
+  replica_host: prd-rr.trivialsec.com
 
 aws:
   region_name: ap-southeast-2

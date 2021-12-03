@@ -1,6 +1,6 @@
-version: '3.7'
+version: '3.9'
 x-defaults: &defaults
-  restart: unless-stopped
+  env_file: .env
   logging:
     options:
       max-size: "10m"
@@ -15,6 +15,18 @@ services:
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
     volumes:
       - db:/srv/app/sqlite
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 200M
 
   statping:
     <<: *defaults
@@ -38,6 +50,22 @@ services:
         aliases:
           - statping
           - status
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+      - CHOWN
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 200M
 
   ghost:
     <<: *defaults
@@ -54,19 +82,6 @@ services:
         aliases:
           - ghost
           - blog
-
-  nginx:
-    <<: *defaults
-    image: nginx
-    container_name: nginx
-    volumes:
-      - /root/nginx/config/nginx.conf:/etc/nginx/nginx.conf
-      - /root/letsencrypt/conf:/etc/letsencrypt
-      - /root/letsencrypt/www:/var/www/certbot
-    ports:
-      - "80:80"
-      - "443:443"
-    command: '/bin/sh -c ''while :; do sleep 10m & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     cap_drop:
       - ALL
     cap_add:
@@ -75,15 +90,28 @@ services:
       - SETUID
       - DAC_OVERRIDE
       - NET_BIND_SERVICE
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 200M
 
-  certbot:
+  nginx:
     <<: *defaults
-    image: certbot/certbot
-    container_name: certbot
+    image: nginx
+    container_name: nginx
     volumes:
-      - /root/letsencrypt/conf:/etc/letsencrypt
-      - /root/letsencrypt/www:/var/www/certbot
-    entrypoint: '/bin/sh -c ''trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'''
+      - /root/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - /root/nginx/certs:/etc/nginx/certs
+      - /root/nginx/options-ssl-nginx.conf:/etc/nginx/options-ssl-nginx.conf
+      - /root/nginx/ssl-dhparams.pem:/etc/nginx/ssl-dhparams.pem
+    ports:
+      - "80:80"
+      - "443:443"
+    command: '/bin/sh -c ''while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'''
     cap_drop:
       - ALL
     cap_add:
@@ -91,14 +119,37 @@ services:
       - SETGID
       - SETUID
       - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
   gitlab-runner:
     <<: *defaults
     image: registry.gitlab.com/trivialsec/containers-common/gitlab-runner
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /root/gitlab-cache:/cache:rw
-      - /root/gitlab-runner-config:/etc/gitlab-runner:rw
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - gitlab-cache:/cache:rw
+    environment:
+      RUNNER_TOKEN: ${RUNNER_TOKEN}
+      RUNNER_TAGS: ${RUNNER_TAGS}
+      RUNNER_NAME: ${RUNNER_NAME}
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 200M
 
   docs:
     <<: *defaults
@@ -114,6 +165,22 @@ services:
       default:
         aliases:
           - docs
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 200M
 
 volumes:
   db:
