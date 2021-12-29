@@ -9,12 +9,6 @@ help: ## This help.
 
 .DEFAULT_GOAL := help
 
-python-libs: ## download and install the trivialsec python libs locally (for IDE completions)
-	yes | pip uninstall -q trivialsec-common
-	@$(shell rm -rf python-libs; git clone -q -c advice.detachedHead=false --depth 1 --branch ${COMMON_VERSION} --single-branch https://${DOCKER_USER}:${DOCKER_PASSWORD}@gitlab.com/trivialsec/python-common.git python-libs)
-	cd python-libs
-	make install
-
 tfinstall:
 	curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
 	sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(shell lsb_release -cs) main"
@@ -30,7 +24,6 @@ deploy: plan apply
 
 plan: init ## Runs tf validate and tf plan
 	cd plans
-	terraform init -reconfigure -upgrade=true
 	terraform validate
 	terraform plan -no-color -out=.tfplan
 	terraform show --json .tfplan | jq -r '([.resource_changes[]?.change.actions?]|flatten)|{"create":(map(select(.=="create"))|length),"update":(map(select(.=="update"))|length),"delete":(map(select(.=="delete"))|length)}' > tfplan.json

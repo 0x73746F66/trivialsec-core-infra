@@ -6,7 +6,7 @@ if [ -f .env ]; then
     source .env
 fi
 
-APP_ENV=${APP_ENV:-default_env}
+APP_ENV=${APP_ENV:-${default_env}}
 read -p "What is your app env (set via APP_ENV)? [${APP_ENV}]: " app_env
 
 if [[ "${app_name:-${APP_NAME}}" == "Prod" ]]; then
@@ -14,7 +14,7 @@ if [[ "${app_name:-${APP_NAME}}" == "Prod" ]]; then
     exit 1
 fi
 
-APP_NAME=${APP_NAME:-default_namespace}
+APP_NAME=${APP_NAME:-${default_namespace}}
 read -p "What is your app name (set via APP_NAME)? [${APP_NAME}]: " app_name
 
 name="/${app_env:-${APP_ENV}}/Deploy/${app_name:-${APP_NAME}}/app_config"

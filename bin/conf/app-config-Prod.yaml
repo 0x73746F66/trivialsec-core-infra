@@ -66,7 +66,7 @@ sendgrid:
     registrations: d-1259c22153484803bdc4d6cb490571a6
     subscriptions: d-14c95c71ba5f40deac27eb8e0bcd0373
     updated_email: d-30f820fc0f8a4f4d9f0fd5592a7419b5
-    account_recovery: d-d6ec3c4db69b46cd8a4bf873ef03bf16
+    account_recovery: d-a791985ca56f4339acd9a77cc5d66cbd
     magic_link: d-c356f835c3b541d2ba76f5f50bb5a27b
     recovery_request: d-11d132b6513749a48005d21cb56df2dc
   groups:
@@ -82,13 +82,15 @@ sendgrid:
 stripe:
   account: acct_1HTJBRGZtHTgMn6l
   products:
+    trial:
+      product_id: prod_KreCY37l4IRIeK
     enterprise:
-      product_id: prod_I3YKq0kh5u21Gy
+      product_id: prod_KreCNP6tT8FWp3
     standard:
       product_id: prod_I3QXcZm1iVM4nZ
       monthly: price_1HTJfyGZtHTgMn6lhohsngNb
-      yearly: price_1HTJfzGZtHTgMn6lUTHe2gbq
+      yearly: price_1KButnGZtHTgMn6leoilkMQp
     professional: 
       product_id: prod_I3Qc8SWBstGEJg
       monthly: price_1HTJkpGZtHTgMn6lgDC7UDf0
-      yearly: price_1HTJkpGZtHTgMn6l1xGWhRVb
+      yearly: price_1KButnGZtHTgMn6lnPCaGZcg

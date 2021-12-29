@@ -1,3 +1,18 @@
 #!/usr/bin/env bash
-
+unset TF_VAR_session_secret_key
+unset TF_VAR_google_api_key
+unset TF_VAR_stripe_publishable_key
+unset TF_VAR_stripe_secret_key
+unset TF_VAR_stripe_webhook_secret
+unset TF_VAR_sendgrid_api_key
+unset TF_VAR_phishtank_username
+unset TF_VAR_phishtank_key
+unset TF_VAR_honeyscore_key
+unset TF_VAR_whoisxmlapi_key
+unset TF_VAR_domaintools_key
+unset TF_VAR_domaintools_user
+unset TF_VAR_domainsdb_key
+unset TF_VAR_linode_token
+unset TF_VAR_aws_access_key_id
+unset TF_VAR_aws_secret_access_key
 reset

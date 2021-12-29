@@ -2,8 +2,6 @@
 
 [![pipeline status](https://gitlab.com/trivialsec/core/badges/main/pipeline.svg)](https://gitlab.com/trivialsec/core/commits/main)
 
-# This repo
-
 # AWS Setup
 
 - Create account
@@ -27,76 +25,245 @@
 
 ## Get setup with JumpCloud and gitlab.com
 
+
+
 ## Install packages
 
+- terraform
+- docker
+- python3 or newer
+- `python3 -m pip install --user pipx`
+- a few self-contained pip packages:
+
 ```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
-sudo apt update && sudo apt install python3-pip python3-venv docker-ce docker-ce-cli containerd.io docker-compose
-sudo usermod -aG docker $(id -un)
-sudo systemctl enable docker
-pip install -q -U pip pipx setuptools wheel 
+pip install -U setuptools wheel 
 pipx install awscli
 pipx install pylint
 pipx install semgrep
 pipx install linode-cli
 ```
 
-## Install bitwarden cli
+## Install bitwarden cli (or just the browser plugin is fine)
 
 ```bash
 unzip -d ~/.local/bin =( wget -qO- 'https://vault.bitwarden.com/download/?app=cli&platform=linux' )
 chmod a+x ~/.local/bin/bw
 ```
 
-## install Terraform
-
-```bash
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com focal main"
-sudo apt-get update && sudo apt-get install -y terraform
-terraform -install-autocomplete
-```
-
-## Run some clone commands
-
-```bash
-mkdir -p $HOME/trivialsec
-cd $HOME/trivialsec
-git clone git@gitlab.com:trivialsec/core.git
-git clone git@gitlab.com:trivialsec/appserver.git
-git clone git@gitlab.com:trivialsec/push-service.git
-git clone git@gitlab.com:trivialsec/aws-iac.git
-git clone git@gitlab.com:trivialsec/containers-common.git
-git clone git@gitlab.com:trivialsec/forward-proxy.git
-git clone git@gitlab.com:trivialsec/ingress-controller.git
-git clone git@gitlab.com:trivialsec/mysql.git
-git clone git@gitlab.com:trivialsec/public-api.git
-git clone git@gitlab.com:trivialsec/python-common.git
-git clone git@gitlab.com:trivialsec/python-webhooks.git
-git clone git@gitlab.com:trivialsec/screenshots.git
-git clone git@gitlab.com:trivialsec/website.git
-git clone git@gitlab.com:trivialsec/workers.git
-```
-
 ## Create VS Code workspace
 
-Create `.trivialsec.code-workspace` file with contents of the file in this repo, place it in `$HOME/trivialsec`
+Create a workspace directory, typically `mkdir -p $HOME/trivialsec`
+
+### Run some clone commands
+
+I like [ghorg](github.com/gabrie30/ghorg)
+
+```bash
+cd $HOME/trivialsec
+go install github.com/gabrie30/ghorg@latest
+ghorg clone trivialsec --branch=main --skip-forks --scm=gitlab
+```
+
+Create `.trivialsec.code-workspace` file with contents of the file in this (`core`) repo, place it in `$HOME/trivialsec`
 
 ## Create your own AWS Service account
 
-old method: using the CloudFormation template in the `aws-iac` repo and then configure your awscli.
+TODO
 
 ## Get the platform running locally
 
-Run `make setup`, `make build`, and `make up` in the `containers-common` which will build the python and nodejs base images for docker and bring up MySQL and Redis locally.
+Make sure `APP_NAME` is set to something unique to you (defualts to your username and hostname but feel free to change that `APP_NAME`)
 
-Run `make package-local` in the `python-common` repo to build the libs needed for the API, App, and Workers projects.
-In `workers` run `make package`.
+And run `make docker-login` after setting `GITLAB_PAT` and `GITLAB_USER` 
 
-In `push-service`, `app-server`, `public-api`, and `workers` projects run `make build` and `make up`.
+### core
 
-For stripe development webhooks, run `make stripe-dev` in `app-server` project after the `app-server` itself is running.
+```bash
+source .in
+./bin/secrets
+./bin/update-app-configs
+```
+
+### elasticsearch
+
+```bash
+source .in
+./bin/secrets
+make setup
+make up
+```
+
+### mysql
+
+```bash
+source .in
+./bin/secrets
+make setup
+make up
+```
+
+### redis
+
+```bash
+source .in
+./bin/secrets
+make setup
+make up
+```
+
+### public-api
+
+```bash
+source .in
+make setup
+make build
+make up
+make python-libs
+```
+
+### appserver
+
+```bash
+source .in
+./bin/secrets
+make setup
+make build
+make up
+make python-libs
+```
+
+### website
+
+```bash
+source .in
+make build
+make up
+```
+
+Run the following in thier own terminal sessions:
+
+```bash
+npm run watch-sass
+npm run watch-js
+```
+
+### Push Service
+
+```bash
+source .in
+make build
+make up
+```
+
+### ingress-controller
+
+```bash
+source .in
+./bin/secrets
+make setup
+make gencerts
+make build
+make up
+```
+
+#### Apply changes made to nginx `conf.d` files
+
+```bash
+# test configs
+docker-compose exec ingress-controller nginx -t
+# apply changes
+docker-compose exec ingress-controller nginx -s reload
+```
+
+### Batch Tasks
+
+```bash
+source .in
+make python-libs
+make setup
+make build
+make up
+```
+
+#### First time setup:
+
+```bash
+# "hostname": "batch.trivialsec"
+docker-compose exec batch /opt/cronicle/bin/storage-cli.js edit global/servers/0
+# "regexp": "^(batch.trivialsec)$"
+docker-compose exec batch /opt/cronicle/bin/storage-cli.js edit global/server_groups/0
+```
+
+Once done these are persisted to the `cronicle-datadir` volume
+
+#### Executing a specific job directly:
+
+```bash
+docker-compose exec --user=trivialsec:trivialsec batch python src/load_exploitdb.py -r -v
+```
+
+Keep things up-to-date locally using `.development/crontab` - but Cronicle actually runs the same locally as in prod if you configure it to do so
+
+#### Checking logs:
+
+```bash
+# combined task execution errors and task result outputs log
+docker-compose exec batch tail -f /var/log/trivialsec/tasks.log
+# all tasks JSON results
+docker-compose exec batch tail -f /var/log/trivialsec/task-runner.log
+# all task errors
+docker-compose exec batch tail -f /var/log/trivialsec/error.log
+# or a sepcific job JSON results
+docker-compose exec batch tail -f /var/log/trivialsec/load_exploitdb.py.log
+```
+
+#### Is Cronicle and the tasks running?
+
+```bash
+# quick easy check; are logs being created?
+docker-compose exec batch watch -cn1 ls -la /var/log/trivialsec
+# Maybe it's not 'time' for any jobs to execute, wait for something to happen
+docker-compose exec batch watch -cn1 ps aux -N r -H
+```
+
+#### Cronicle data backup and restore:
+
+```bash
+docker-compose exec batch /opt/cronicle/bin/control.sh export > cronicle-export.bak
+# restore; first copy the backup into the docker container
+docker cp cronicle-export.bak batch:/tmp/backup.txt
+docker exec batch node /opt/cronicle/bin/storage-cli.js import /tmp/backup.txt
+# restart container
+```
+
+#### Cronicle Shell Script for Cronicle schedules:
+
+```bash
+#!/bin/bash
+/srv/app/src/runlog python /srv/app/src/load_exploitdb.py -r --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_xforce.py -r --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_aws_alas.py -y $(date '+%Y') --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_oval.py -y --suse $(date '+%Y') --not-before $(date '+%Y-%m-%dT00:00:00' -d "1 day ago") --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_oval.py -y --debian $(date '+%Y') --not-before $(date '+%Y-%m-%dT00:00:00' -d "1 day ago") --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_oval.py -y --redhat $(date '+%Y') --not-before $(date '+%Y-%m-%dT00:00:00' -d "1 day ago") --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_oval.py -y --cis $(date '+%Y') --not-before $(date '+%Y-%m-%dT00:00:00' -d "1 day ago") --only-show-errors
+/srv/app/src/runlog python /srv/app/src/load_nvd_cve.py --latest --only-show-errors --not-before $(date '+%Y-%m-%dT%H:00Z' -d "2 hours ago")
+/srv/app/src/runlog python /srv/app/src/load_nvd_cve.py --modified --only-show-errors --not-before $(date '+%Y-%m-%dT%H:00Z' -d "2 hours ago")
+```
+
+Webhooks are fired by Cronicle, filtered using Zapier, sent to Slack.
+
+### workers
+
+```bash
+
+```
+
+### webhooks
+
+> TODO: FastAPI or Golang?
+
+For now, Stripe development webhooks, just run `make stripe-dev` in `appserver` project after the `appserver` itself is running (to process the webhooks stripe will send).
 
 ## Note on linode PAT
 
