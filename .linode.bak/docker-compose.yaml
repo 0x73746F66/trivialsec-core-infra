@@ -125,32 +125,6 @@ services:
         condition: on-failure
         max_attempts: 3
 
-  gitlab-runner:
-    <<: *defaults
-    image: registry.gitlab.com/trivialsec/containers-common/gitlab-runner
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:rw
-      - gitlab-cache:/cache:rw
-    environment:
-      RUNNER_TOKEN: ${RUNNER_TOKEN}
-      RUNNER_TAGS: ${RUNNER_TAGS}
-      RUNNER_NAME: ${RUNNER_NAME}
-    cap_drop:
-      - ALL
-    cap_add:
-      - CHOWN
-      - SETGID
-      - SETUID
-      - DAC_OVERRIDE
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 200M
-
   docs:
     <<: *defaults
     image: ghost:4-alpine
@@ -186,9 +160,6 @@ volumes:
   db:
     external: true
     name: linode-slack-db
-  gitlab-cache:
-    external: true
-    name: gitlab-cache
 
 networks:
   default:

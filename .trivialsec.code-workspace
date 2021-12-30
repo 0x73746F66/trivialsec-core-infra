@@ -196,8 +196,8 @@
             "path": "redis"
         },
         {
-            "path": "containers-common",
-            "name": "Containers"
+            "path": "gitlab-runner",
+            "name": "gitlab-runner"
         },
         {
             "name": "Proxy",
